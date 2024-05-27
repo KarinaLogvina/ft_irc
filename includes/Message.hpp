@@ -1,0 +1,4 @@
+#ifndef FT_IRC_MESSAGE_HPP
+#define FT_IRC_MESSAGE_HPP
+
+#endif //FT_IRC_MESSAGE_HPP
