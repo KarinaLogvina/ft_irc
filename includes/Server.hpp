@@ -4,36 +4,32 @@
 #define FT_IRC_SERVER_HPP
 
 #include "Client.hpp"
+#include "Channel.hpp"
 #include <iostream>
 #include <vector>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
 #include <sstream>
+#include <fcntl.h>
+#include "poll.h"
+#include <cstring>
 
 class Client;
 class Channel;
 
-struct addrinfo {
-  sockaddr_family_t     sin_family;
-  in_port_t             sin_port;
-  struct  in_addr       sin_addr;
-  char                  sin_zero[8];
-};
-
-struct in_addr {
-  in_addr_t s_addr;
-};
-
 class Server {
   private:
     int port;
-    int socket_fd;
+    int server_socket_fd;
     static bool Signal;
     std::string password;
     std::vector<Client> clients;
     std::vector<Channel> channels;
     std::vector<struct pollfd> fds;
     struct sockaddr_in add;
-    struct sockaddr_in cli_add;
-    struct pollfd new_cli;
+    struct sockaddr_in client_add;
+    struct pollfd new_client;
 
   public:
     Server();
@@ -69,6 +65,23 @@ class Server {
 
     void CloseSocket();
     void ClearClient();
+
+    // removers
+    void removeChannel(std::string name);
+    void removeChannels(int fd);
+
+    // Signals
+
+    void static SignalHandler(int signum);
+    void	close_fds();
+
+    void init_server(int port, std::string password);
+    void set_server_socket();
+    void reciveDataFromClient(int fd);
+
+    //---parsers
+
+    std::vector<std::string> split_Buffer(std::string str);
 };
 
 #endif //FT_IRC_SERVER_HPP

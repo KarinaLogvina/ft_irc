@@ -40,7 +40,8 @@ class Client {
     std::string getNickname();
     std::string getUserName();
     std::string getIpAdd();
-    std::string getHostName();
+    std::string getHostname();
+    std::string getBuffer();
 
     //----setters----
     void setFd(int fd);
@@ -48,10 +49,14 @@ class Client {
     void SetNickName(std::string& nickname);
     void SetIsLoggedIn(bool value);
     void SetIsRegistered(bool value);
+    void setBuffer(std::string revieced_line);
+
     //----utils----
     void clearBuffer();
     void addChannelInvite(std::string &channelName);
     void removeChannelInvite(std::string &channelName);
+
+
 };
 
 #endif //FT_IRC_CLIENT_HPP

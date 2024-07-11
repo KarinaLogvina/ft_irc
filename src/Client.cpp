@@ -33,29 +33,32 @@ bool Client::getIsRegistered() {return this->is_registered;};
 bool Client::getIsLoggedIn() {return this->is_logged_in;};
 std::string Client::getNickname() {return this->nickname;};
 std::string Client::getUserName() {return this->username;};
-bool Client::getHostName() {
-   std::string hostname = this->getNickname() + "!" + this->getUserName();
+std::string Client::getHostname(){
+	std::string hostname = this->getNickname() + "!" + this->getUserName();
+	return hostname;
 }
+std::string Client::getBuffer() {return buffer;}
 
 //---setters---
-void Client::setFd(int fd) {this->fd = fd};
-void Client::setIpAdd(std::string ipadd) {this->ipadd = ipadd};
-void Client::SetNickName(std::string &nickname) {this->nickname = nickname};
-void Client::SetIsLoggedIn(bool value) {this->is_logged_in = value};
-void Client::SetIsRegistered(bool value) (bool value) {this->is_registered = value};
+void Client::setFd(int fd) {this->fd = fd;}
+void Client::setIpAdd(std::string ipadd) {this->ipadd = ipadd;}
+void Client::SetNickName(std::string &nickname) {this->nickname = nickname;}
+void Client::SetIsLoggedIn(bool value) {this->is_logged_in = value;}
+// void Client::SetIsRegistered(bool value) (bool value) {this->is_registered = value};
+void Client::setBuffer(std::string recived){buffer += recived;}
 
 //--utils--
 
 void Client::clearBuffer() {buffer.clear()};
-void Client::addChannelInvite(std::string &channelName) {
-  ChannelsInvite.push_back(channelName);
-}
+// void Client::addChannelInvite(std::string &channelName) {
+//   ChannelsInvite.push_back(channelName);
+// }
 
-void Client::removeChannelInvite(std::string &channelName) {
-  for (size_t i = 0; i < this->ChannelsInvite.size(); i++){
-    if (this->ChannelsInvite[i] == channelName)
-    {this->ChannelsInvite.erase(this->ChannelsInvite.begin() + i); return;}
-  }
-}
+// void Client::removeChannelInvite(std::string &channelName) {
+//   for (size_t i = 0; i < this->ChannelsInvite.size(); i++){
+//     if (this->ChannelsInvite[i] == channelName)
+//     {this->ChannelsInvite.erase(this->ChannelsInvite.begin() + i); return;}
+//   }
+// }
 
 
