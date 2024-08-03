@@ -165,6 +165,14 @@ std::vector<std::string> Server::split_command (std::string &command) {
 }
 
 
+bool Server::isClientRegistered(int fd) {
+	if(!GetClient(fd) || GetClient(fd)->getNickname().empty() || GetClient(fd)->getUserName().empty()) {
+		return false;
+	}
+	return true;
+}
+
+
 void Server::senderror(int code, std::string clientname, int fd, std::string message) {
 	std::stringstream stringStream;
 	stringStream << ":localhost " << code << " " << clientname << message;
@@ -186,4 +194,19 @@ void Server::_sendResponse(std::string response, int fd)
 {
 	if(send(fd, response.c_str(), response.size(), 0) == -1)
 		std::cerr << "Response send() faild" << std::endl;
+}
+
+
+void Server::ParseCommand(std::string &command, int &fd) {
+	if(command.empty()) {
+		return ;
+	}
+	std::vector<std::string> splited_cmd = split_command(command);
+	size_t found = command.find_first_not_of(" \t\v");
+	if (found != std::string::npos) {
+		command = command.substr(found);
+	}
+	if(!isClientRegistered(fd)) {
+		_sendResponse()
+	}
 }

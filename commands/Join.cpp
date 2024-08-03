@@ -8,4 +8,6 @@ ERR_NOTONCHANNEL (442)
 ERR_CHANOPRIVSNEEDED (482)
 ERR_USERONCHANNEL (443)*/
 
-void Server::Join ()
+void Server::Join () {
+    
+}

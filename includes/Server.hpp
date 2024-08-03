@@ -62,6 +62,8 @@ class Server {
     void ServerSocket();
     void AddNewClient(int fd);
 
+    bool isClientRegistered(int fd);
+
 
     void CloseSocket();
     void ClearClient();
@@ -93,6 +95,8 @@ class Server {
     //---CMD
     void Join(std::string cmd, int fd);
     void Invite(std::string &cmd, int &fd);
+    void Topic(std::string &command);
+    void ParseCommand(std::string &command, int &fd);
 };
 
 #endif //FT_IRC_SERVER_HPP
