@@ -79,9 +79,20 @@ class Server {
     void set_server_socket();
     void reciveDataFromClient(int fd);
 
+    void 		_sendResponse(std::string response, int fd);
+
     //---parsers
 
     std::vector<std::string> split_Buffer(std::string str);
+    std::vector<std::string> split_command(std::string &str);
+
+    //error_methods
+    void senderror(int code, std::string clientname, int fd, std::string message);
+	  void sendChannelerror(int code, std::string clientname, std::string channelname, int fd, std::string message);
+
+    //---CMD
+    void Join(std::string cmd, int fd);
+    void Invite(std::string &cmd, int &fd);
 };
 
 #endif //FT_IRC_SERVER_HPP

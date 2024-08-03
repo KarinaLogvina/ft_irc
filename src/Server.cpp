@@ -151,3 +151,39 @@ std::vector<std::string> Server::split_Buffer(std::string str)
 	return vec;
 }
 
+
+std::vector<std::string> Server::split_command (std::string &command) {
+	std::vector<std::string> vec;
+	std::istringstream stm(command);
+	std::string token;
+	while(stm >> token)
+	{
+		vec.push_back(token);
+		token.clear();
+	}
+	return vec;
+}
+
+
+void Server::senderror(int code, std::string clientname, int fd, std::string message) {
+	std::stringstream stringStream;
+	stringStream << ":localhost " << code << " " << clientname << message;
+	std::string response = stringStream.str();
+	if(send(fd, response.c_str(), response.size(),0) == -1)
+		std::cerr << "send() faild" << std::endl;
+
+};
+
+void Server::sendChannelerror(int code, std::string clientname, std::string channelname, int fd, std::string message) {
+		std::stringstream stringStream;
+	stringStream << ":localhost " << code << " " << clientname << channelname << message;
+	std::string response = stringStream.str();
+	if(send(fd, response.c_str(), response.size(),0) == -1)
+		std::cerr << "send() faild" << std::endl;
+}
+
+void Server::_sendResponse(std::string response, int fd)
+{
+	if(send(fd, response.c_str(), response.size(), 0) == -1)
+		std::cerr << "Response send() faild" << std::endl;
+}

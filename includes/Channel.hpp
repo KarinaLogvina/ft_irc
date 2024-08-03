@@ -10,6 +10,7 @@ class Channel {
     int topic;
     int key;
     int limit;
+    int is_invite_only;
     std::string name;
     std::string password;
     std::string createdAt;
@@ -30,12 +31,15 @@ class Channel {
     int GetKey();
     int GetLimit();
     int GetNumberOfClients();
+    int GetInvitOnly();
     std::string GetChannelName();
     std::string GetPassword();
     std::string GetTimestamp();
     std::string clientChannel_list();
+
     Client *get_client(int fd);
     Client *get_admin(int fd);
+    Client *FindClientInChannel(std::string name);
 
     //---setters---
     void addClient(Client newClient);

@@ -9,11 +9,12 @@ Channel::Channel(){
   this->createdAt = "";
   this->createdTime = "";
   this->topicName = "";
+  this->is_invite_only = 0;
 }
 
-Channel::~Channel();
-Channel::Channel(Channel const &src) {*this = src};
-Channel::operator=(Channel const &src){
+Channel::~Channel(){};
+Channel::Channel(Channel const &src) {*this = src;}
+Channel &Channel::operator=(Channel const &src){
   if (this != &src) {
     this->topic = src.topic;
     this->key = src.key;
@@ -25,7 +26,8 @@ Channel::operator=(Channel const &src){
     this->topicName = src.topicName;
     this->clients = src.clients;
     this->admins = src.admins;
-    this->timeCreation = src.timeCreation;
+    this->createdTime = src.createdTime;
+    this->is_invite_only = src.is_invite_only;
   }
   return *this;
 }
@@ -38,20 +40,20 @@ std::string Channel::GetChannelName() { return this->name};
 std::string Channel::GetPassword() { return this->password};
 std::string Channel::GetTimestamp() { return this->creationTime};
 std::string Channel::clientChannel_list() {
-  std::lins clientsList;
+  std::string clientsList;
   for(size_t i = 0; i < admins.size(); i++){
-    list += "@" + admins[i].getNickname();
+    clientsList += "@" + admins[i].getNickname();
     if((i + 1) < admins.size())
-      list += " ";
+      clientsList += " ";
   }
   if(clients.size())
-    list += " ";
+    clientsList += " ";
   for(size_t i = 0; i < clients.size(); i++){
-    list += clients[i].getNickname();
+    clientsList += clients[i].getNickname();
     if((i + 1) < clients.size())
-      list += " ";
+      clientsList += " ";
   }
-  return list;
+  return clientsList;
 }
 
 Client *Channel::get_client(int fd){
@@ -70,25 +72,38 @@ Client *Channel::get_admin(int fd){
   return NULL;
 }
 
+int Channel::GetInvitOnly(){return this->is_invite_only;}
+
+Client *Channel::FindClientInChannel(std::string name) {
+   for (std::vector<Client>::iterator it = admins.begin(); it != admins.end(); ++it){
+    if (it->getNickname() == name)
+      return &(*it);
+  }
+    for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it){
+    if (it->getNickname() == name)
+      return &(*it);
+  }
+  return NULL;
+}
+
 //---setters---
-void Channel::addClient(Client newClient) {clients.push_back(newClient)};
-void Channel::addAdmin(Client newAdmin) {admins.push_back(newClient)};
+void Channel::addClient(Client newClient) {clients.push_back(newClient);}
+void Channel::addAdmin(Client newAdmin) {admins.push_back(newAdmin);}
 void Channel::removeClient(int fd) {
-  for (std::vector<Client>iterator it =clients.begin(); it !=clients.end()) {
+  for (std::vector<Client>::iterator it =clients.begin(); it !=clients.end(); ++it) {
     if (it->GetFd() == fd) {
-      clients.errase(it);
+      clients.erase(it);
       break;
     }
   }
 }
 
 void Channel::removeAdmin(int fd) {
-  for (std::vector<Client>iterator it =admins.begin(); it !=admins.end()) {
+  for (std::vector<Client>::iterator it =admins.begin(); it !=admins.end(); ++it) {
     if (it->GetFd() == fd) {
-      admins.errase(it);
+      admins.erase(it);
       break;
     }
   }
 }
-
 
