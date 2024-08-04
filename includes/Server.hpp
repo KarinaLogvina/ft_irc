@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include "poll.h"
 #include <cstring>
+#include "replies.hpp"
 
 class Client;
 class Channel;
@@ -94,6 +95,10 @@ class Server {
 
     //---CMD
     void Join(std::string cmd, int fd);
+    int  SplitJoin(std::vector<std::pair<std::string, std::string>>& token, std::string cmd, int fd);
+    int   SearchClient(std::string &nick);
+    int HowManyChannelsClientHas(std::string nick);
+    void JoinToExistingChannel(std::vector<std::pair<std::string, std::string> >&token, int i, int j, int fd);
     void Invite(std::string &cmd, int &fd);
     void Topic(std::string &command);
     void ParseCommand(std::string &command, int &fd);

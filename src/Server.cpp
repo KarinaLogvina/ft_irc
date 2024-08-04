@@ -190,10 +190,11 @@ void Server::sendChannelerror(int code, std::string clientname, std::string chan
 		std::cerr << "send() faild" << std::endl;
 }
 
-void Server::_sendResponse(std::string response, int fd)
-{
-	if(send(fd, response.c_str(), response.size(), 0) == -1)
-		std::cerr << "Response send() faild" << std::endl;
+
+void _sendResponse(const std::string& response, int fd) {
+    if (send(fd, response.c_str(), response.size(), 0) == -1) {
+        std::cerr << "Response send() failed" << std::endl;
+    }
 }
 
 
@@ -206,7 +207,15 @@ void Server::ParseCommand(std::string &command, int &fd) {
 	if (found != std::string::npos) {
 		command = command.substr(found);
 	}
-	if(!isClientRegistered(fd)) {
-		_sendResponse()
+   if (!isClientRegistered(fd)) {
+        _sendResponse(ERR_USERNOTREGISTERED(std::string("*")), fd);
+        return;
+    } else {
+		if (splited_cmd.size() && (splited_command[0] == "INVITE" || splited_command[0] == "invite")) {
+			Invite(command, fd);
+		} else if (splited_cmd.size() && (splited_command[0] == "JOIN" || splited_command[0] == "invite")) {
+			Join(command, fd);
+		}
 	}
+
 }

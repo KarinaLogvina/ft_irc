@@ -18,7 +18,8 @@ class Client {
     int fd;
     bool is_registered;
     bool is_logged_in;
-    std::vector<std::string> ChannelsForClient;
+    std::vector<std::string> ChannelsInvitation;
+
     std::string nickname;
     std::string username;
     std::string hostname;
@@ -33,7 +34,7 @@ class Client {
     Client(Client const &src);
     Client &operator=(Client const &src);
     //----getters----
-    int GetFd(){return fd;};
+    int GetFd();
     bool getIsRegistered();
     bool getIsLoggedIn();
 
@@ -42,6 +43,7 @@ class Client {
     std::string getIpAdd();
     std::string getHostname();
     std::string getBuffer();
+    bool getInviteChannel(std::string &channelName);
 
     //----setters----
     void setFd(int fd);
