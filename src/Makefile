@@ -1,10 +1,14 @@
 NAME		= ircserv
 
-SRCS		= ircserv.cpp
+SRCS		= main.cpp Server.cpp Client.cpp Channel.cpp utils.cpp
 
 OBJS		= $(SRCS:.cpp=.o)
 
-#HEADER		= PmergeMe.hpp
+HEADER		= Server.hpp Client.hpp Channel.hpp response.hpp utils.hpp
+
+HEADER_DIR  = ../includes/
+
+HEADERS		= $(addprefix ../includes/, $(HEADER)) 
 
 CC			= c++
 
@@ -14,10 +18,10 @@ RM			= rm -f
 
 all:		$(NAME)
 
-$(NAME):	$(OBJS)
+$(NAME):	$(OBJS) $(HEADERS)
 			$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
-%.o:		%.cpp $(HEADER)
+%.o:		%.cpp 
 			$(CC) $(CFLAGS) -c $<
 
 clean:

@@ -28,8 +28,8 @@ int	main(int argc, char **argv)
 	(void)password;
 
 	struct addrinfo	hints;
-	struct addrinfo	*serv;
 	int				error;
+	struct addrinfo	*serv;
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_flags = AI_PASSIVE;
@@ -65,26 +65,33 @@ int	main(int argc, char **argv)
 	listen(serv_socket, 10);
 	std::cout << "Listening..." << std::endl;
 
-	struct pollfd	fds[OPEN_MAX];
-	int				fd_count;
-	int				i;
+	std::vector<struct pollfd> poll_fds;
+	struct pollfd serv_pollfd;
+	serv_pollfd.fd = serv_socket;  // Server socket file descriptor
+	serv_pollfd.events = POLLIN;   // Monitor for incoming data (readable)
+	poll_fds.push_back(serv_pollfd);  // Add to the poll_fds vector
 
-	fds[0].fd = serv_socket;
-	fds[0].events = POLLIN;
-	fd_count = 1;
+	int poll_return;
+	int timeout = 100000; //100 seconds
+
 	while (1)
 	{
-		if (poll(fds, fd_count, -1) == -1)
+		if ((poll_return = poll(poll_fds.data(), poll_fds.size(), timeout)) == -1)
 		{
 			perror("Error: poll");
 			return -1;
 		}
-		i = 0;
-		while (i < fd_count)
+		if (!poll_return)
 		{
-			if (fds[i].revents != 0)
+			std::cout << "Error: server timeout" << std::endl;
+			return -1;
+		}
+	
+		for (size_t i = 0; i < poll_fds.size(); i++)
+		{
+			if (poll_fds[i].revents & POLLIN)
 			{
-				if (fds[i].fd == serv_socket)
+				if (poll_fds[i].fd == serv_socket)
 				{
 					int				client_socket;
 					struct sockaddr client_addr;
@@ -97,10 +104,11 @@ int	main(int argc, char **argv)
 						perror("Error: accept");
 						return -1;
 					}
-					fds[fd_count].fd = client_socket;
-					fds[fd_count].events = POLLIN;
-					fd_count++;
-					std::cout << "Client " << client_socket << " connected" \
+					struct pollfd client_pollfd;
+					client_pollfd.fd = client_socket;
+					client_pollfd.events = POLLIN;
+					poll_fds.push_back(client_pollfd);
+					std::cout << "[C1] Client " << client_socket << " connected" \
 						<< std::endl;
 				}
 				else
@@ -108,8 +116,7 @@ int	main(int argc, char **argv)
 					char	buffer[BUFFER_LENGTH];
 					int		bytes_received;
 				
-					bytes_received = recv(fds[i].fd, \
-							buffer, BUFFER_LENGTH - 1, 0);
+					bytes_received = recv(poll_fds[i].fd, buffer, sizeof buffer, 0);
 					if (bytes_received == -1)
 					{
 						perror("Error: recv");
@@ -117,24 +124,21 @@ int	main(int argc, char **argv)
 					}
 					if (bytes_received == 0)
 					{
-						close(fds[i].fd);
-						std::cout << "Client " << fds[i].fd \
-							<< " closed connection" << std::endl;
-						fds[i].fd = fds[fd_count - 1].fd;
-						fd_count--;
+						close(poll_fds[i].fd);
+						poll_fds.erase(poll_fds.begin() + i);
+						i--;
+						std::cout << "[D] Client " << poll_fds[i].fd << " closed connection" << std::endl;
 					}
 					else
 					{
 						buffer[bytes_received] = '\0';
-						std::cout << "Received message: " << buffer \
-							<< " from client " << fds[i].fd << std::endl;
+						std::cout << "[M] Received message: " << buffer \
+							<< "	from client " << poll_fds[i].fd << std::endl;
 					}
 				}
 			}
-			i++;
 		}
 	}
-
 	close(serv_socket);
 
 	return 0;

@@ -29,12 +29,13 @@ class Client {
   public:
     Client();
     ~Client();
-    Client(std::string nickname, std::string username, int fd);
-    Client(Client const &src);
+	Client(int fd);
+	Client(int fd, std::string nickname, std::string username);
+	Client(Client const &src);
     Client &operator=(Client const &src);
     //----getters----
-    int GetFd(){return fd;};
-    bool getIsRegistered();
+	int GetFd();
+	bool getIsRegistered();
     bool getIsLoggedIn();
 
     std::string getNickname();
@@ -47,7 +48,8 @@ class Client {
     void setFd(int fd);
     void setIpAdd(std::string ipadd);
     void SetNickName(std::string& nickname);
-    void SetIsLoggedIn(bool value);
+	void SetUserName(std::string &username);
+	void SetIsLoggedIn(bool value);
     void SetIsRegistered(bool value);
     void setBuffer(std::string revieced_line);
 
