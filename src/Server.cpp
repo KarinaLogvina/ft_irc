@@ -40,7 +40,7 @@ int Server::GetFd()
 	return this->serv_socket;
 }
 
-Client *Server::GetClient(int fd)
+Client *Server::getClient(int fd)
 {
 	for (size_t i = 0; i < this->clients.size(); ++i)
 	{
@@ -140,6 +140,7 @@ int Server::init(char *port, std::string password)
 	struct addrinfo *serv;
 	int error;
 	int en = 1; // разобраться
+	this->serverIp = ":127.0.0.1 ";
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_flags = AI_PASSIVE;
@@ -198,7 +199,7 @@ void Server::start(void)
 		if (fds[i].fd == serv_socket)
 			accept_client();
 		else
-			receive_message_from_client(i);
+			receive_message_from_client(fds[i].fd);
 	}
 
 	return;
@@ -243,28 +244,40 @@ void Server::accept_client(void)
 	return;
 }
 
-void Server::receive_message_from_client(int i)
+void Server::receive_message_from_client(int fd)
 {
 	char buffer[BUFFER_LENGTH];
 	int bytes_received;
 
 	memset(buffer, 0, sizeof(buffer));
-	bytes_received = recv(fds[i].fd, buffer, sizeof(buffer), 0);
+	bytes_received = recv(fd, buffer, sizeof(buffer), 0);
 	if (bytes_received == -1)
-		this->stop("recv");
+		stop("recv");
 	buffer[bytes_received] = '\0';
 	if (bytes_received == 0)
-		this->disconnect_client(fds[i].fd);
+		disconnect_client(fd);
 	else
 	{
 		std::string buf = buffer;
+		Client * client = getClient(fd);
 
 		if (buf.find("\n") == std::string::npos)
-			std::cout << "Received partial message: \"" << buf << "\" from client "
-					  << fds[i].fd << std::endl;
-		// add partial data
-		else
-			this->parse_messages(buffer, i);
+		{	std::cout << "Received partial message: \"" << buf << "\" from client "
+					  << fd << std::endl;
+			client->setBuffer(buffer);
+		}
+		else 
+		{
+			if (client->getBuffer().find('\n') == std::string::npos) // if we receive the final part with \n
+			{
+				client->setBuffer(buffer);
+				if (parse_messages(client->getBuffer(), fd) == ERR)
+					return;
+				client->clearBuffer();
+				return;
+			}
+			parse_messages(buffer, fd); //parse normal message
+		}
 	}
 }
 
@@ -276,21 +289,26 @@ void Server::disconnect_client(int fd)
 	this->removeFd(fd);
 }
 
-void Server::parse_messages(std::string messages, int i)
+int Server::parse_messages(std::string messages, int fd) //change to stringstream
 {
 	std::string message;
+	size_t position;
 
-	while (messages.find("\r") != std::string::npos)
+	while ( (position = messages.find_first_of("\r\n")) != std::string::npos) // changed from \r to \r\n
 	{
-		message = messages.substr(0, messages.find("\r"));
+		message = messages.substr(0, messages.find_first_of("\r\n"));
+		if (message.empty())
+			return ERR;
 		std::cout << "Received message: \"" << message << "\" from client "
-				  << fds[i].fd << std::endl;
-		if (this->parseMessage(message, fds[i].fd) == ERR) // stop parsing
-			return;
+				  << fd << std::endl;
+		if (this->parseMessage(message, fd) == ERR) // stop parsing
+			return ERR;
+		if (messages[position] == '\n') //if not an irc client, e.g. nc
+			return ERR;
 		messages = messages.substr(messages.find("\r") + 2);
 	}
 
-	return;
+	return 0;
 }
 
 int Server::parseMessage(std::string buffer, int fd)
@@ -299,8 +317,8 @@ int Server::parseMessage(std::string buffer, int fd)
 	std::string reply;
 	std::string server("127.0.0.1 ");
 	Client *client;
-	this->parseReceivedMessage(buffer);
-	client = this->GetClient(fd);
+	this->parseTokens(buffer);
+	client = this->getClient(fd);
 	if ((result = this->handleCommands(*client)) == UNKNOWN_CMD)
 		std::cout << "This is the end of the world" << std::endl;
 	if (result == ERR) // stop parsing, command terminated with error
@@ -308,7 +326,7 @@ int Server::parseMessage(std::string buffer, int fd)
 	return 0;
 }
 
-void Server::parseReceivedMessage(const std::string &message)
+void Server::parseTokens(const std::string &message)
 {
 	std::istringstream iss(message);
 	std::string token;
@@ -340,9 +358,7 @@ void Server::parseReceivedMessage(const std::string &message)
 			break;
 		}
 		else
-		{
 			client_msg.params.push_back(trim(token));
-		}
 	}
 
 	// Get the rest of the trailing message if any
@@ -368,19 +384,20 @@ int Server::handleCommands(Client &client)
 	it = commandMap.find(client_msg.command);
 	if (it != commandMap.end())
 		return (this->*(it->second))(client);
-	else
-		return -1;
+	std::string reply = serverIp + ERR_UNKNOWNCOMMAND(client.getNickname(), client_msg.command);
+	send(client.GetFd(), reply.c_str(), reply.size(), 0);
+	return UNKNOWN_CMD;
 }
 
 int Server::handlePass(Client &client)
 {
 	std::string server = ":127.0.0.1 ";
-	std::string reply = "\r\n";
+	std::string reply;
 	if (client.getIsLoggedIn())
 		reply = server + ERR_ALREADYREGISTERED(client.getNickname());
-	else if (client_msg.params.size() > 1)
+	else if (client_msg.params.size() < 1)
 	{
-		std::cout << "Password should contain only one param" << std::endl;
+		std::cout << "Password should contain at least one param" << std::endl;
 		reply = server +
 			ERR_NEEDMOREPARAMS(client.getNickname(), this->client_msg.command);
 	}
@@ -388,6 +405,7 @@ int Server::handlePass(Client &client)
 	{
 		std::cout << "Handled a password successfully" << std::endl;
 		client.SetIsLoggedIn(true);
+		return 0;
 	}
 	else
 	{
@@ -407,29 +425,38 @@ int Server::handlePass(Client &client)
 int Server::handleNick(Client &client)
 {
 	std::string server = ":127.0.0.1 ";
-	std::string reply = "\r\n";
+	std::string reply;
+
 	if (!client.getIsLoggedIn())
 	{
 		std::cout << "Client is not logged in" << std::endl;
+		return ERR;
 	}
-	else if (this->client_msg.params.size() < 1)
+	if (client_msg.params.empty())
 		reply = server + ERR_NONICKNAMEGIVEN(client.getNickname());
-	else if (this->nicknameExists())
-		reply =
-			server + ERR_NICKNAMEINUSE(client.getNickname(), client_msg.params[0]); // assign a defalut nickname after
-	else if (!checkNickname(client_msg.params[0]))
-		reply = server + ERR_ERRONEUSNICKNAME(client.getNickname(), client_msg.params[0]);
 	else
 	{
-		if (client.getIsRegistered())
-			reply = ":" + client.getNickname() + "!~wizzard42@127.0.0.1 " + "NICK " + client_msg.params[0] + "\r\n";
-		client.SetNickName(client_msg.params[0]);
-		// client.SetIsRegistered(true);
-	}
+		std::string &newNickname = client_msg.params[0];
 
+		if (client.getNickname() == newNickname)
+			return 0;
+		else if (this->nicknameExists(newNickname))
+			reply = server + ERR_NICKNAMEINUSE(client.getNickname(), newNickname);
+		else if (!checkNickname(newNickname))
+			reply = server + ERR_ERRONEUSNICKNAME(client.getNickname(), newNickname);
+		else 
+		{
+			if (!client.getIsRegistered())
+			{
+				client.SetNickName(newNickname);
+				return 0;
+			}
+			reply = ":" + client.getNickname() + CMD_NICK(client.getUserName(), newNickname);
+			client.SetNickName(newNickname);
+		}
+	}
+	
 	send(client.GetFd(), reply.c_str(), reply.size(), 0);
-	// std::cout << "Client " << client.GetFd() << " is now " <<
-	// client_msg.params[0] << std::endl;
 	return 0;
 }
 
@@ -443,23 +470,29 @@ int Server::handleCap(Client &client)
 	return 0;
 }
 
-int Server::handleUser(Client &client)
+int Server::handleUser(Client &client) // check if username is valid
 {
 	std::string reply = "\r\n";
 	std::string server = ":127.0.0.1 ";
+	
+	if (!client.getIsLoggedIn())
+	{
+		std::cout << "Client is not logged in" << std::endl;
+		return ERR;
+	}
 	if (client_msg.params.size() < 1)
-		reply = server +
-			ERR_NEEDMOREPARAMS(client.getNickname(), this->client_msg.command);
+		reply = server + ERR_NEEDMOREPARAMS(client.getNickname(), this->client_msg.command);
 	else if (client.getIsRegistered())
 		reply = server + ERR_ALREADYREGISTERED(client.getNickname());
 	else
 	{
 		client.SetUserName(client_msg.params[0]);
-		if (!client.getIsRegistered())
-		{	
-			this->welcomeClient(client);
+		if (client.getNickname() != "*")
+		{
+			welcomeClient(client);
 			client.SetIsRegistered(true);
 		}
+		return 0;
 	}
 	send(client.GetFd(), reply.c_str(), reply.size(), 0);
 	return 0;
@@ -515,11 +548,11 @@ Client &Server::AddNewClient(int fd)
 	return clients.back();
 }
 
-bool Server::nicknameExists()
+bool Server::nicknameExists(std::string nickname)
 {
 	for (size_t i = 0; i < this->clients.size(); i++)
 	{
-		if (toLower(clients[i].getNickname()) == toLower(this->client_msg.params[0]))
+		if (toLower(clients[i].getNickname()) == toLower(nickname))
 			return true;
 	}
 	return false;

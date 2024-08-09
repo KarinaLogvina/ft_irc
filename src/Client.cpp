@@ -64,7 +64,7 @@ void Client::SetIsRegistered(bool value)
 {
 	this->is_registered = value;
 }
-void Client::setBuffer(std::string recived){buffer += recived;}
+void Client::setBuffer(std::string recived){this->buffer += recived;}
 
 //--utils--
 

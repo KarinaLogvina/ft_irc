@@ -36,6 +36,7 @@ class Server
 	static bool Signal;
 	bool logged_in;
 	std::string password;
+	std::string serverIp;
 	std::vector<Client> clients;
 	std::vector<Channel> channels;
 	std::vector<struct pollfd> fds;
@@ -49,13 +50,13 @@ class Server
 		std::string trailing;
 	} client_msg;
 
-	void parseReceivedMessage(const std::string &message);
+	void parseTokens(const std::string &message);
 	void printMessage(const clientMessage &msg);
-	void receive_message_from_client(int i);
+	void receive_message_from_client(int fd);
 	void accept_client(void);
 	void disconnect_client(int fd);
 	void add_fd(int socket);
-	void parse_messages(std::string commands, int i);
+	int parse_messages(std::string commands, int i);
 	void welcomeClient(Client &client);
 
 	// commands
@@ -64,7 +65,7 @@ class Server
 	int handleNick(Client &client);
 	int handleCap(Client &client);
 	int handleUser(Client &client);
-	bool nicknameExists();
+	bool nicknameExists(std::string nickname);
 	bool checkNickname(std::string nickname);
 	int handlePong(Client &client);
 	int handlePrivMsg(Client & client);
@@ -84,7 +85,7 @@ class Server
 	int GetFd();
 	int GetPort();
 	std::string GetPassword();
-	Client *GetClient(int fd);
+	Client *getClient(int fd);
 	Client *GetClientByNickname(std::string nickname);
 	Channel *GetChannel(std::string name);
 	time_t *getCreatedAt();
