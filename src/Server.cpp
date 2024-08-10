@@ -45,9 +45,7 @@ Client *Server::getClient(int fd)
 	for (size_t i = 0; i < this->clients.size(); ++i)
 	{
 		if (this->clients[i].GetFd() == fd)
-		{
 			return &this->clients[i];
-		}
 	}
 	return NULL;
 }
@@ -264,19 +262,16 @@ void Server::receive_message_from_client(int fd)
 		if (buf.find("\n") == std::string::npos)
 		{	std::cout << "Received partial message: \"" << buf << "\" from client "
 					  << fd << std::endl;
-			client->setBuffer(buffer);
+			client->setBuffer(buf);
 		}
 		else 
 		{
-			if (client->getBuffer().find('\n') == std::string::npos) // if we receive the final part with \n
+			if (!client->getBuffer().empty()) // if we have acummulated buffer
 			{
-				client->setBuffer(buffer);
-				if (parse_messages(client->getBuffer(), fd) == ERR)
-					return;
+				buf = client->getBuffer() + buf;
 				client->clearBuffer();
-				return;
 			}
-			parse_messages(buffer, fd); //parse normal message
+			parse_messages(buf, fd); //parse normal message
 		}
 	}
 }
