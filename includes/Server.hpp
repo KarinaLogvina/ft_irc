@@ -96,12 +96,16 @@ class Server {
     //---CMD
     void Join(std::string cmd, int fd);
     int  SplitJoin(std::vector<std::pair<std::string, std::string>>& token, std::string cmd, int fd);
-    int   SearchClient(std::string &nick);
+    int SearchClient(const std::string &nickname);
     int HowManyChannelsClientHas(std::string nick);
     void JoinToExistingChannel(std::vector<std::pair<std::string, std::string> >&token, int i, int j, int fd);
+    void JoinToNotExistingChannel(std::vector<std::pair<std::string, std::string>> &token, int i, int fd);
     void Invite(std::string &cmd, int &fd);
     void Topic(std::string &command);
     void ParseCommand(std::string &command, int &fd);
+    std::string SplitKickCommand(std::string command, std::vector<std::string> &temp, std::string &user, int fd);
+    std::string SplitCmdKick(std::string cmd, std::vector<std::string> &tmp, std::string &user, int fd);
+    void Kick(std::string cmd, int fd);
 };
 
 #endif //FT_IRC_SERVER_HPP

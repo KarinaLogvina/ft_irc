@@ -1,4 +1,5 @@
 #include "../includes/Channel.hpp"
+#include "Channel.hpp"
 
 Channel::Channel(){
   this->topic = 0;
@@ -32,13 +33,27 @@ Channel &Channel::operator=(Channel const &src){
   return *this;
 }
 
-int Channel::GetTopic() { return this->topic}
-int Channel::GetKey() { return this->key};
-int Channel::GetLimit() { return this->limit};
-int Channel::GetNumberOfClients() { return this->clients.size() + this->admins.size()};
-std::string Channel::GetChannelName() { return this->name};
-std::string Channel::GetPassword() { return this->password};
-std::string Channel::GetTimestamp() { return this->creationTime};
+int Channel::GetTopic() { return this->topic;}
+int Channel::GetKey() { return this->key;}
+int Channel::GetLimit() { return this->limit;}
+int Channel::GetNumberOfClients() { return this->clients.size() + this->admins.size();}
+std::string Channel::GetChannelName() { return this->name;}
+std::string Channel::GetPassword() { return this->password;}
+std::string Channel::GetTimestamp() { return this->creationTime;}
+void Channel::SetInvitOnly(int invit_only){this->is_invite_only = invit_only;}
+void Channel::SetTopic(int topic){this->topic = topic;}
+void Channel::SetTime(std::string time){this->creationTime = time;}
+void Channel::SetKey(int key){this->key = key;}
+void Channel::SetLimit(int limit){this->limit = limit;}
+void Channel::SetTopicName(std::string topic_name){this->topicName = topic_name;}
+void Channel::SetPassword(std::string password){this->password = password;}
+void Channel::SetName(std::string name){this->name = name;}
+void Channel::setCreateiontime(){
+	std::time_t _time = std::time(NULL);
+	std::ostringstream oss;
+	oss << _time;
+	this->createdAt = std::string(oss.str());
+}
 std::string Channel::clientChannel_list() {
   std::string clientsList;
   for(size_t i = 0; i < admins.size(); i++){

@@ -33,6 +33,7 @@ class Channel {
     int GetNumberOfClients();
     int GetInvitOnly();
     std::string GetChannelName();
+    std::string Channel::GetTopicName(){return this->topicName;}
     std::string GetPassword();
     std::string GetTimestamp();
     std::string clientChannel_list();
@@ -46,6 +47,15 @@ class Channel {
     void addAdmin(Client newClient);
     void removeClient(int fd);
     void removeAdmin(int fd);
+    void SetInvitOnly(int invit_only);
+    void SetTime(std::string time);
+  	void SetTopic(int topic);
+  	void SetKey(int key);
+  	void SetLimit(int limit);
+  	void SetTopicName(std::string topic_name);
+  	void SetPassword(std::string password);
+  	void SetName(std::string name);
+    void setCreateiontime();
     bool changeClientToAdmin(std::string &nickname);
     bool removeClientAdminStatus(std::string &nickname);
 

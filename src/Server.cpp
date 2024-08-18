@@ -202,7 +202,7 @@ void Server::ParseCommand(std::string &command, int &fd) {
 	if(command.empty()) {
 		return ;
 	}
-	std::vector<std::string> splited_cmd = split_command(command);
+	std::vector<std::string> splited_command = split_command(command);
 	size_t found = command.find_first_not_of(" \t\v");
 	if (found != std::string::npos) {
 		command = command.substr(found);
@@ -211,9 +211,9 @@ void Server::ParseCommand(std::string &command, int &fd) {
         _sendResponse(ERR_USERNOTREGISTERED(std::string("*")), fd);
         return;
     } else {
-		if (splited_cmd.size() && (splited_command[0] == "INVITE" || splited_command[0] == "invite")) {
+		if (splited_command.size() && (splited_command[0] == "INVITE" || splited_command[0] == "invite")) {
 			Invite(command, fd);
-		} else if (splited_cmd.size() && (splited_command[0] == "JOIN" || splited_command[0] == "invite")) {
+		} else if (splited_command.size() && (splited_command[0] == "JOIN" || splited_command[0] == "invite")) {
 			Join(command, fd);
 		}
 	}
