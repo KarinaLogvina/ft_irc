@@ -1,5 +1,4 @@
 #include "../includes/Channel.hpp"
-#include "Channel.hpp"
 
 Channel::Channel(){
   this->topic = 0;

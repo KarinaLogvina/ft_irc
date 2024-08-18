@@ -7,6 +7,7 @@
 #include "Channel.hpp"
 #include <iostream>
 #include <vector>
+#include <ctime> 
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -15,6 +16,7 @@
 #include "poll.h"
 #include <cstring>
 #include "replies.hpp"
+
 
 class Client;
 class Channel;

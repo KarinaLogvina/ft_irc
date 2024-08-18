@@ -2,6 +2,9 @@
 #define FT_IRC_CHANNEL_HPP
 
 #include "Client.hpp"
+#include <sstream>
+#include <ctime> 
+
 
 class Client;
 
