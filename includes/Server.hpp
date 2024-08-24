@@ -75,6 +75,8 @@ class Server {
     // removers
     void removeChannel(std::string name);
     void removeChannels(int fd);
+    void removeFds(int fd);
+    void removeClient(int fd);
 
     // Signals
 
@@ -112,6 +114,10 @@ class Server {
     std::string SplitKickCommand(std::string command, std::vector<std::string> &temp, std::string &user, int fd);
     std::string SplitCmdKick(std::string cmd, std::vector<std::string> &tmp, std::string &user, int fd);
     void Kick(std::string cmd, int fd);
+    void handleClientQuit(int fd, const std::string &reason, Channel &channel);
+    void Quit(std::string command, int &fd);
+    void CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd);
+    void PivMSG(std::string cmd, int fd);
 };
 
 #endif //FT_IRC_SERVER_HPP

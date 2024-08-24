@@ -227,3 +227,52 @@ void Server::ParseCommand(std::string &command, int &fd) {
 	}
 
 }
+
+//removers 
+
+void Server::removeClient(int fd){
+	for (size_t i = 0; i < this->clients.size(); i++){
+		if (this->clients[i].GetFd() == fd){
+			this->clients.erase(this->clients.begin() + i); 
+			return;
+		}
+	}
+}
+
+void Server::removeChannel(std::string name){
+	for (size_t i = 0; i < this->channels.size(); i++){
+		if (this->channels[i].GetChannelName() == name){
+			this->channels.erase(this->channels.begin() + i); 
+			return;
+		}
+	}
+}
+
+void Server::removeFds(int fd){
+	for (size_t i = 0; i < this->fds.size(); i++){
+		if (this->fds[i].fd == fd) {
+			this->fds.erase(this->fds.begin() + i); 
+			return;
+		}
+	}
+}
+
+
+void	Server::removeChannels(int fd){
+	for (size_t i = 0; i < this->channels.size(); i++){
+		int flag = 0;
+		if (channels[i].get_client(fd)){
+			channels[i].removeClient(fd); flag = 1;
+		}
+		else if (channels[i].get_admin(fd)) {
+			channels[i].removeAdmin(fd); flag = 1;
+		}
+		if (channels[i].GetNumberOfClients() == 0) {
+			channels.erase(channels.begin() + i); i--; continue;
+		}
+		if (flag){
+			std::string reply = ":" + GetClient(fd)->getNickname() + "!~" + GetClient(fd)->getUserName() + "@localhost QUIT Quit\r\n";
+			channels[i].sendToAll(reply);
+		}
+	}
+}

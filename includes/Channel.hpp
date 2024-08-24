@@ -65,6 +65,7 @@ class Channel {
     bool removeClientAdminStatus(std::string &nickname);
 
     void sendToAll(std::string replay);
+    void sendToAllExcept(std::string rpl1, int fd)
 
 };
 #endif //FT_IRC_CHANNEL_HPP
