@@ -10,6 +10,7 @@ Channel::Channel(){
   this->createdTime = "";
   this->topicName = "";
   this->is_invite_only = 0;
+  this->topic_restriction = false;
 }
 
 Channel::~Channel(){};
@@ -23,6 +24,7 @@ Channel &Channel::operator=(Channel const &src){
     this->password = src.password;
     this->createdAt = src.createdAt;
     this->createdTime = src.creationTime;
+    this->topic_restriction = src.topic_restriction;
     this->topicName = src.topicName;
     this->clients = src.clients;
     this->admins = src.admins;

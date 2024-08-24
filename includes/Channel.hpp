@@ -20,6 +20,7 @@ class Channel {
     std::string creationTime;
     std::string createdTime;
     std::string topicName;
+    bool topic_restriction;
     std::vector<Client> clients;
     std::vector<Client> admins;
 
@@ -37,6 +38,7 @@ class Channel {
     int GetInvitOnly();
     std::string GetChannelName();
     std::string Channel::GetTopicName(){return this->topicName;}
+    bool Channel::GetTopicRestriction() const{return this->topic_restriction;}
     std::string GetPassword();
     std::string GetTimestamp();
     std::string clientChannel_list();

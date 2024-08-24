@@ -1,5 +1,6 @@
 
 #include "../includes/Server.hpp"
+#include "Server.hpp"
 
 Server::Server(){this->server_socket_fd = -1;}
 Server::~Server(){};
@@ -20,6 +21,13 @@ Server & Server::operator=(const Server &src) {
 // ---getters---
 int Server::GetPort() { return this->port;}
 int Server::GetFd() { return this->server_socket_fd;}
+
+std::string Server::getTopicTimestamp() {
+	std::time_t current = std::time(NULL);  // Получаем текущее время как значение типа time_t
+    std::stringstream res;                 // Создаем stringstream для построения строки
+    res << current;                        // Вставляем текущее время в stringstream
+    return res.str();
+}
 
 Client *Server::GetClient(int fd) {
   for (size_t i = 0; i < this->clients.size(); ++i) {

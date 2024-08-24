@@ -46,6 +46,7 @@ class Server {
     int GetPort();
     std::string GetPassword();
     Client *GetClient(int fd);
+    std::string getTopicTimestamp();
     Client *GetClientNickname(std::string nickname);
     Channel *GetChannel(std::string name);
 
@@ -103,7 +104,10 @@ class Server {
     void JoinToExistingChannel(std::vector<std::pair<std::string, std::string> >&token, int i, int j, int fd);
     void JoinToNotExistingChannel(std::vector<std::pair<std::string, std::string>> &token, int i, int fd);
     void Invite(std::string &cmd, int &fd);
-    void Topic(std::string &command);
+    std::string getTopicTime();
+    std::string getTopic(std::string &input);
+    int getPositionOfColon(std::string &cmd);
+    void Topic(std::string &command, int &fd);
     void ParseCommand(std::string &command, int &fd);
     std::string SplitKickCommand(std::string command, std::vector<std::string> &temp, std::string &user, int fd);
     std::string SplitCmdKick(std::string cmd, std::vector<std::string> &tmp, std::string &user, int fd);
