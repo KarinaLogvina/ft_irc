@@ -223,6 +223,14 @@ void Server::ParseCommand(std::string &command, int &fd) {
 			Invite(command, fd);
 		} else if (splited_command.size() && (splited_command[0] == "JOIN" || splited_command[0] == "invite")) {
 			Join(command, fd);
+		} else if(splited_command.size() && (splited_command[0] == "KICK" || splited_command[0] == "kick")) {
+			Kick(command, fd);
+		} else if (splited_command.size() && (splited_command[0] == "PRIVMSG" || splited_command[0] == "privmsg")) {
+			PivMSG(command, fd);
+		} else if (splited_command.size() && (splited_command[0] == "QUIT" || splited_command[0] == "quit")) {
+			Quit(command, fd);
+		} else if (splited_command.size() && (splited_command[0] == "TOPIC" || splited_command[0] == "topic")) {
+			Topic(command, fd);
 		}
 	}
 
