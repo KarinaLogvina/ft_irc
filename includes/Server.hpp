@@ -22,6 +22,8 @@
 #include <vector>
 
 #define BUFFER_LENGTH 512
+#include "replies.hpp"
+
 
 class Client;
 class Channel;
@@ -86,6 +88,7 @@ class Server
 	int GetPort();
 	std::string GetPassword();
 	Client *getClient(int fd);
+    std::string getTopicTimestamp();
 	Client *GetClientByNickname(std::string nickname);
 	Channel *GetChannel(std::string name);
 	time_t *getCreatedAt();
@@ -105,6 +108,8 @@ class Server
 	void ServerInit();
 	void ServerSocket();
 	Client &AddNewClient(int fd);
+    bool isClientRegistered(int fd);
+
 
 	void CloseSocket();
 	void ClearClient();
@@ -114,18 +119,49 @@ class Server
 	void removeChannels(int fd);
 	void removeClient(int fd);
 	void removeFd(int fd);
+    void removeFds(int fd);
 
 	// Signals
 
 	void static SignalHandler(int signum);
 	void close_fds();
 
-	void set_server_socket();
-	void reciveDataFromClients();
+    void init_server(int port, std::string password);
+    void set_server_socket();
+    void reciveDataFromClient(int fd);
+    void reciveDataFromClients(int fd);
+
+	void 		_sendResponse(std::string response, int fd);
 
 	//---parsers
 
 	std::vector<std::string> split_Buffer(std::string str);
+    std::vector<std::string> split_command(std::string &str);
+
+    //error_methods
+    void senderror(int code, std::string clientname, int fd, std::string message);
+	  void sendChannelerror(int code, std::string clientname, std::string channelname, int fd, std::string message);
+
+    //---CMD
+    void Join(std::string cmd, int fd);
+    int  SplitJoin(std::vector<std::pair<std::string, std::string>>& token, std::string cmd, int fd);
+    int SearchClient(const std::string &nickname);
+    int HowManyChannelsClientHas(std::string nick);
+    void JoinToExistingChannel(std::vector<std::pair<std::string, std::string> >&token, int i, int j, int fd);
+    void JoinToNotExistingChannel(std::vector<std::pair<std::string, std::string>> &token, int i, int fd);
+    void Invite(std::string &cmd, int &fd);
+    std::string getTopicTime();
+    std::string getTopic(std::string &input);
+    int getPositionOfColon(std::string &cmd);
+    void Topic(std::string &command, int &fd);
+    void ParseCommand(std::string &command, int &fd);
+    std::string SplitKickCommand(std::string command, std::vector<std::string> &temp, std::string &user, int fd);
+    std::string SplitCmdKick(std::string cmd, std::vector<std::string> &tmp, std::string &user, int fd);
+    void Kick(std::string cmd, int fd);
+    void handleClientQuit(int fd, const std::string &reason, Channel &channel);
+    void Quit(std::string command, int &fd);
+    void CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd);
+    void PivMSG(std::string cmd, int fd);
 	int parseMessage(std::string buffer, int fd);
 };
 

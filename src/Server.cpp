@@ -31,13 +31,14 @@ Server &Server::operator=(const Server &src)
 }
 
 // ---getters---
-int Server::GetPort()
-{
-	return this->port;
-}
-int Server::GetFd()
-{
-	return this->serv_socket;
+int Server::GetPort() { return this->port;}
+int Server::GetFd() { return this->serv_socket;}
+
+std::string Server::getTopicTimestamp() {
+	std::time_t current = std::time(NULL);  // Получаем текущее время как значение типа time_t
+    std::stringstream res;                 // Создаем stringstream для построения строки
+    res << current;                        // Вставляем текущее время в stringstream
+    return res.str();
 }
 
 Client *Server::getClient(int fd)
@@ -593,18 +594,126 @@ void Server::welcomeClient(Client &client)
 	send(client.GetFd(), reply.c_str(), reply.size(), 0);
 }
 
-void Server::removeClient(int fd)
-{
-	for (size_t i = 0; i < clients.size(); i++) {
-		if (clients[i].GetFd() == fd)
-			clients.erase(clients.begin() + i);
-	}
-}
-
 void Server::removeFd(int fd)
 {
 	for (size_t i = 0; i < fds.size(); i++) {
 		if (fds[i].fd == fd)
 			fds.erase(fds.begin() + i);
+	}
+}
+std::vector<std::string> Server::split_command (std::string &command) {
+	std::vector<std::string> vec;
+	std::istringstream stm(command);
+	std::string token;
+	while(stm >> token)
+	{
+		vec.push_back(token);
+		token.clear();
+	}
+	return vec;
+}
+
+
+bool Server::isClientRegistered(int fd) {
+	if(!getClient(fd) || getClient(fd)->getNickname().empty() || getClient(fd)->getUserName().empty()) {
+		return false;
+	}
+	return true;
+}
+
+
+void Server::senderror(int code, std::string clientname, int fd, std::string message) {
+	std::stringstream stringStream;
+	stringStream << ":localhost " << code << " " << clientname << message;
+	std::string response = stringStream.str();
+	if(send(fd, response.c_str(), response.size(),0) == -1)
+		std::cerr << "send() faild" << std::endl;
+
+};
+
+void Server::sendChannelerror(int code, std::string clientname, std::string channelname, int fd, std::string message) {
+		std::stringstream stringStream;
+	stringStream << ":localhost " << code << " " << clientname << channelname << message;
+	std::string response = stringStream.str();
+	if(send(fd, response.c_str(), response.size(),0) == -1)
+		std::cerr << "send() faild" << std::endl;
+}
+
+
+void _sendResponse(const std::string& response, int fd) {
+    if (send(fd, response.c_str(), response.size(), 0) == -1) {
+        std::cerr << "Response send() failed" << std::endl;
+    }
+}
+
+
+void Server::ParseCommand(std::string &command, int &fd) {
+	if(command.empty()) {
+		return ;
+	}
+	std::vector<std::string> splited_command = split_command(command);
+	size_t found = command.find_first_not_of(" \t\v");
+	if (found != std::string::npos) {
+		command = command.substr(found);
+	}
+   if (!isClientRegistered(fd)) {
+        _sendResponse(ERR_USERNOTREGISTERED(std::string("*")), fd);
+        return;
+    } else {
+		if (splited_command.size() && (splited_command[0] == "INVITE" || splited_command[0] == "invite")) {
+			Invite(command, fd);
+		} else if (splited_command.size() && (splited_command[0] == "JOIN" || splited_command[0] == "invite")) {
+			Join(command, fd);
+		}
+	}
+
+}
+
+//removers 
+
+void Server::removeClient(int fd){
+	for (size_t i = 0; i < this->clients.size(); i++){
+		if (this->clients[i].GetFd() == fd){
+			this->clients.erase(this->clients.begin() + i); 
+			return;
+		}
+	}
+}
+
+void Server::removeChannel(std::string name){
+	for (size_t i = 0; i < this->channels.size(); i++){
+		if (this->channels[i].GetChannelName() == name){
+			this->channels.erase(this->channels.begin() + i); 
+			return;
+		}
+	}
+}
+
+void Server::removeFds(int fd){
+	for (size_t i = 0; i < this->fds.size(); i++){
+		if (this->fds[i].fd == fd) {
+			this->fds.erase(this->fds.begin() + i); 
+			return;
+		}
+	}
+}
+
+
+void	Server::removeChannels(int fd){
+	for (size_t i = 0; i < this->channels.size(); i++){
+		int flag = 0;
+		if (channels[i].get_client(fd)){
+			channels[i].removeClient(fd); flag = 1;
+		}
+		else if (channels[i].get_admin(fd)) {
+			channels[i].removeAdmin(fd); flag = 1;
+		}
+		if (channels[i].GetNumberOfClients() == 0) {
+			channels.erase(channels.begin() + i); i--; continue;
+		}
+		if (flag){
+			std::string reply = ":" + getClient(fd)->getNickname() + "!~" + getClient(fd)->getUserName() + "@localhost QUIT Quit\r\n";
+			channels[i].sendToAll(reply);
+		}
 	}
 }

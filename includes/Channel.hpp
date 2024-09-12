@@ -2,6 +2,9 @@
 #define FT_IRC_CHANNEL_HPP
 
 #include "Client.hpp"
+#include <sstream>
+#include <ctime> 
+
 
 class Client;
 
@@ -10,12 +13,14 @@ class Channel {
     int topic;
     int key;
     int limit;
+    int is_invite_only;
     std::string name;
     std::string password;
     std::string createdAt;
     std::string creationTime;
     std::string createdTime;
     std::string topicName;
+    bool topic_restriction;
     std::vector<Client> clients;
     std::vector<Client> admins;
 
@@ -30,22 +35,38 @@ class Channel {
     int GetKey();
     int GetLimit();
     int GetNumberOfClients();
+    int GetInvitOnly();
     std::string GetChannelName();
+    std::string GetTopicName(){return this->topicName;}
+    bool GetTopicRestriction() const{return this->topic_restriction;}
     std::string GetPassword();
     std::string GetTimestamp();
     std::string clientChannel_list();
+
     Client *get_client(int fd);
     Client *get_admin(int fd);
+    Client *FindClientInChannel(std::string name);
 
     //---setters---
     void addClient(Client newClient);
     void addAdmin(Client newClient);
     void removeClient(int fd);
     void removeAdmin(int fd);
+    void SetInvitOnly(int invit_only);
+    void SetTime(std::string time);
+  	void SetTopic(int topic);
+  	void SetKey(int key);
+  	void SetLimit(int limit);
+  	void SetTopicName(std::string topic_name);
+  	void SetPassword(std::string password);
+  	void SetName(std::string name);
+    void setCreateiontime();
     bool changeClientToAdmin(std::string &nickname);
     bool removeClientAdminStatus(std::string &nickname);
 
     void sendToAll(std::string replay);
+    void sendToAllExcept(std::string rpl1, int fd);
 
 };
+
 #endif //FT_IRC_CHANNEL_HPP

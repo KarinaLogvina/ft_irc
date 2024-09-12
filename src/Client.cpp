@@ -1,14 +1,14 @@
 #include "../includes/Client.hpp"
+#include "Client.hpp"
 
 Client::Client() {
     this->fd = -1;
     this->buffer = "";
     this->nickname = "";
     this->username = "";
-	this->username = "";
-	this->is_logged_in = false;
-	this->is_registered = false;
-	this->ipadd = "";
+    this->is_logged_in = false;
+    this->is_registered = false;
+    this->ipadd = "";
 }
 
 Client::Client(int fd)
@@ -28,6 +28,7 @@ Client&Client::operator=(Client const &src) {
         this->is_logged_in = src.is_logged_in;
         this->is_registered = src.is_registered;
         this->ipadd = src.ipadd;
+        this->ChannelsInvitation = src.ChannelsInvitation;
     }
     return *this;
 };
@@ -68,19 +69,25 @@ void Client::setBuffer(std::string recived){this->buffer += recived;}
 
 //--utils--
 
-void Client::clearBuffer()
-{
-	buffer.clear();
-}
-// void Client::addChannelInvite(std::string &channelName) {
-//   ChannelsInvite.push_back(channelName);
-// }
+void Client::clearBuffer() {buffer.clear()};
 
-// void Client::removeChannelInvite(std::string &channelName) {
-//   for (size_t i = 0; i < this->ChannelsInvite.size(); i++){
-//     if (this->ChannelsInvite[i] == channelName)
-//     {this->ChannelsInvite.erase(this->ChannelsInvite.begin() + i); return;}
-//   }
-// }
+bool Client::getInviteChannel(std::string &channelName) {
+    for(size_t i =0; i < this->ChannelsInvitation.size(); i++) {
+        if(this->ChannelsInvitation[i] == channelName) {
+            return true;
+        }
+    }
+    return false;
+}
+void Client::addChannelInvite(std::string &channelName) {
+  ChannelsInvitation.push_back(channelName);
+}
+
+void Client::removeChannelInvite(std::string &channelName) {
+  for (size_t i = 0; i < this->ChannelsInvite.size(); i++){
+    if (this->ChannelsInvitation[i] == channelName)
+    {this->ChannelsInvitation.erase(this->ChannelsInvitation.begin() + i); return;}
+  }
+}
 
 
