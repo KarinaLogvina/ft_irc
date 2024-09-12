@@ -2,11 +2,17 @@ NAME		= ircserv
 
 SRCS_DIR	= src/
 
+COMMANDS_DIR = commands/
+
 OBJS_DIR	= objs/
 
 SRCS		= main.cpp Server.cpp Client.cpp Channel.cpp utils.cpp
 
-OBJS		= $(SRCS:%.cpp=$(OBJS_DIR)%.o)
+COMMAND_SRCS = Invite.cpp Join.cpp Kick.cpp PrivMSG.cpp Quit.cpp Topic.cpp
+
+ALL_SRCS = $(SRCS:%=$(SRCS_DIR)%) $(COMMAND_SRCS:%=$(COMMANDS_DIR)%)
+
+OBJS		= $(ALL_SRCS:%.cpp=$(OBJS_DIR)%.o)
 
 CC			= c++
 
@@ -19,7 +25,7 @@ all:		$(NAME)
 $(NAME):	$(OBJS)
 			$(CC) $(CFLAGS) $^ -o $@
 
-$(OBJS):	$(OBJS_DIR)%.o: ${SRCS_DIR}%.cpp
+$(OBJS_DIR)%.o: %.cpp
 			@mkdir -p $(dir $@)
 			$(CC) $(CFLAGS) -c $< -o $@
 

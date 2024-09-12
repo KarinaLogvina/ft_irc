@@ -144,11 +144,11 @@ class Server
 
     //---CMD
     void Join(std::string cmd, int fd);
-    int  SplitJoin(std::vector<std::pair<std::string, std::string>>& token, std::string cmd, int fd);
+    int  SplitJoin(std::vector<std::pair<std::string, std::string> >& token, std::string cmd, int fd);
     int SearchClient(const std::string &nickname);
     int HowManyChannelsClientHas(std::string nick);
     void JoinToExistingChannel(std::vector<std::pair<std::string, std::string> >&token, int i, int j, int fd);
-    void JoinToNotExistingChannel(std::vector<std::pair<std::string, std::string>> &token, int i, int fd);
+    void JoinToNotExistingChannel(std::vector<std::pair<std::string, std::string> > &token, int i, int fd);
     void Invite(std::string &cmd, int &fd);
     std::string getTopicTime();
     std::string getTopic(std::string &input);
