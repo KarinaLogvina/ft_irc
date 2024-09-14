@@ -1,5 +1,4 @@
 #include "../includes/Server.hpp"
-#include "Server.hpp"
 
 void FindPrivmessageCommand(std::string command, std::string tofind, std::string &str) {
     size_t i = 0;
@@ -74,21 +73,21 @@ void Server::CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd) {
             tmp[i].erase(tmp[i].begin());
             if (!GetChannel(tmp[i])) {
                 //ERR_NOSUCHNICK (401) // if the channel doesn't exist
-                senderror(401, "#" + tmp[i], GetClient(fd)->GetFd(), " :No such nick/channel\r\n");
+                senderror(401, "#" + tmp[i], getClient(fd)->GetFd(), " :No such nick/channel\r\n");
                 tmp.erase(tmp.begin() + i);
                 i--;
-            } else if (!GetChannel(tmp[i])->FindClientInChannel(GetClient(fd)->getNickname())) {
+            } else if (!GetChannel(tmp[i])->FindClientInChannel(getClient(fd)->getNickname())) {
                 //ERR_CANNOTSENDTOCHAN (404) // if the client is not in the channel
-                sendChannelerror(404, GetClient(fd)->getNickname(), "#" + tmp[i], GetClient(fd)->GetFd(), " :Cannot send to channel\r\n");
+                sendChannelerror(404, getClient(fd)->getNickname(), "#" + tmp[i], getClient(fd)->GetFd(), " :Cannot send to channel\r\n");
                 tmp.erase(tmp.begin() + i);
                 i--;
             } else {
                 tmp[i] = "#" + tmp[i];
             }
         } else {
-            if (!GetClientNickname(tmp[i])) {
+            if (!GetClientByNickname(tmp[i])) {
                 //ERR_NOSUCHNICK (401) // if the client doesn't exist
-                senderror(401, tmp[i], GetClient(fd)->GetFd(), " :No such nick/channel\r\n");
+                senderror(401, tmp[i], getClient(fd)->GetFd(), " :No such nick/channel\r\n");
                 tmp.erase(tmp.begin() + i);
                 i--;
             }
@@ -103,32 +102,32 @@ void Server::PivMSG(std::string cmd, int fd) {
 
     // Проверка на наличие получателей
     if (targets.empty()) {
-        senderror(411, GetClient(fd)->getNickname(), GetClient(fd)->GetFd(), " :No recipient given (PRIVMSG)\r\n");
+        senderror(411, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :No recipient given (PRIVMSG)\r\n");
         return;
     }
 
     // Проверка на наличие текста сообщения
     if (message.empty()) {
-        senderror(412, GetClient(fd)->getNickname(), GetClient(fd)->GetFd(), " :No text to send\r\n");
+        senderror(412, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :No text to send\r\n");
         return;
     }
 
     // Проверка на слишком большое количество получателей
     if (targets.size() > 10) {
-        senderror(407, GetClient(fd)->getNickname(), GetClient(fd)->GetFd(), " :Too many recipients\r\n");
+        senderror(407, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :Too many recipients\r\n");
         return;
     }
 
     CheckForChannelsAndClients(targets, fd); // Проверка существования каналов и клиентов
 
     // Отправка сообщения получателям
-    for (const std::string& target : targets) {
-        std::string response = ":" + GetClient(fd)->getNickname() + "!~" + GetClient(fd)->getUserName() + "@localhost PRIVMSG " + target + " :" + message + "\r\n";
-        if (target[0] == '#') {
-            std::string channelName = target.substr(1); // Удаляем символ '#'
+    for (std::vector<std::string>::iterator target = targets.begin(); target != targets.end(); target++) {
+        std::string response = ":" + getClient(fd)->getNickname() + "!~" + getClient(fd)->getUserName() + "@localhost PRIVMSG " + *target + " :" + message + "\r\n";
+        if ((*target)[0] == '#') {
+            std::string channelName = (*target).substr(1); // Удаляем символ '#'
             GetChannel(channelName)->sendToAllExcept(response, fd);
         } else {
-            _sendResponse(response, GetClientNickname(target)->GetFd());
+            _sendResponse(response, GetClientByNickname(*target)->GetFd());
         }
     }
 }

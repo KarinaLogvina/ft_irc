@@ -1,6 +1,5 @@
-#include "./includes/Server.hpp"
-#include "Server.hpp"
-
+#include "../includes/Server.hpp"
+#include <vector>
 
 void FindQuitCommand(std::string command, std::string tofind, std::string &str){
     size_t i = 0;
@@ -41,12 +40,13 @@ std::string SplitQuitCommand(std::string command){
 }
 
 void Server::handleClientQuit(int fd, const std::string& reason, Channel& channel) {
-    std::string reply = ":" + GetClient(fd)->getNickname() + "!~" + GetClient(fd)->getUserName() + "@localhost QUIT " + reason + "\r\n";
+    std::string reply = ":" + getClient(fd)->getNickname() + "!~" + getClient(fd)->getUserName() + "@localhost QUIT " + reason + "\r\n";
     channel.sendToAll(reply);
     channel.removeClient(fd);
     if (channel.GetNumberOfClients() == 0) {
         // Удаляем канал, если в нем больше нет клиентов
-        auto it = std::find(channels.begin(), channels.end(), channel);
+        std::vector<Channel>::iterator it;
+        it = std::find(channels.begin(), channels.end(), channel);
         if (it != channels.end()) {
             channels.erase(it);
         }
@@ -56,9 +56,9 @@ void Server::handleClientQuit(int fd, const std::string& reason, Channel& channe
 void Server::Quit(std::string command, int &fd) {
     std::string reason = SplitQuitCommand(command);
 
-    for (auto& channel : channels) {
-        if (channel.get_client(fd) || channel.get_admin(fd)) {
-            handleClientQuit(fd, reason, channel);
+    for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); it++) {
+        if ((*it).get_client(fd) || (*it).get_admin(fd)) {
+            handleClientQuit(fd, reason, *it);
         }
     }
 

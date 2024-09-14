@@ -29,6 +29,7 @@ class Channel {
     ~Channel();
     Channel(Channel const &src);
     Channel &operator=(Channel const &src);
+    bool operator==(const Channel &other) const;
 
     //---getters---
     int GetTopic();
@@ -36,7 +37,7 @@ class Channel {
     int GetLimit();
     int GetNumberOfClients();
     int GetInvitOnly();
-    std::string GetChannelName();
+    std::string GetChannelName() const;
     std::string GetTopicName(){return this->topicName;}
     bool GetTopicRestriction() const{return this->topic_restriction;}
     std::string GetPassword();
@@ -68,5 +69,7 @@ class Channel {
     void sendToAllExcept(std::string rpl1, int fd);
 
 };
+
+bool operator==(Channel &lhs, Channel &rhs);
 
 #endif //FT_IRC_CHANNEL_HPP

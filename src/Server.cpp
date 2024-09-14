@@ -640,7 +640,7 @@ void Server::sendChannelerror(int code, std::string clientname, std::string chan
 }
 
 
-void _sendResponse(const std::string& response, int fd) {
+void Server::_sendResponse(const std::string& response, int fd) {
     if (send(fd, response.c_str(), response.size(), 0) == -1) {
         std::cerr << "Response send() failed" << std::endl;
     }

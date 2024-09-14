@@ -50,6 +50,7 @@ std::string Client::getHostname(){
 	return hostname;
 }
 std::string Client::getBuffer() {return buffer;}
+std::string Client::getIpAdd() {return ipadd;}
 
 //---setters---
 void Client::setFd(int fd) {this->fd = fd;}

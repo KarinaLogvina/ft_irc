@@ -1,5 +1,4 @@
 #include "../includes/Server.hpp"
-#include "Server.hpp"
 
 std::string FindAndSplitCmdK(std::string &cmd, std::vector<std::string> &tmp) {
     // Разделение команды на части
@@ -75,7 +74,7 @@ std::string Server::SplitCmdKick(std::string cmd, std::vector<std::string> &temp
         if (*(temp[i].begin()) == '#')
             temp[i].erase(temp[i].begin());
         else {
-            sendChannelerror(403, GetClient(fd)->getNickname(), temp[i], GetClient(fd)->GetFd(), " :No such channel\r\n");
+            sendChannelerror(403, getClient(fd)->getNickname(), temp[i], getClient(fd)->GetFd(), " :No such channel\r\n");
             temp.erase(temp.begin() + i--);
         }
     }
@@ -94,7 +93,7 @@ void Server::Kick(std::string cmd, int fd)
 
     // Проверяем, указаны ли все необходимые параметры
     if (tmp.size() < 3) {
-        senderror(461, GetClient(fd)->getNickname(), GetClient(fd)->GetFd(), " :Not enough parameters\r\n");
+        senderror(461, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :Not enough parameters\r\n");
         return;
     }
 
@@ -128,7 +127,7 @@ void Server::Kick(std::string cmd, int fd)
         }
 
         if (tmp[i][0] != '#') {
-            sendChannelerror(403, GetClient(fd)->getNickname(), tmp[i], GetClient(fd)->GetFd(), " :No such channel\r\n");
+            sendChannelerror(403, getClient(fd)->getNickname(), tmp[i], getClient(fd)->GetFd(), " :No such channel\r\n");
             tmp.erase(tmp.begin() + i--);
             continue;
         }
@@ -137,33 +136,33 @@ void Server::Kick(std::string cmd, int fd)
     }
 
     // Обрабатываем каждый канал
-    for (const std::string& channel : tmp) {
-        Channel* ch = GetChannel(channel);
+    for (std::vector<std::string>::iterator channel = tmp.begin(); channel != tmp.end(); channel++) {
+        Channel* ch = GetChannel(*channel);
         if (!ch) {
-            sendChannelerror(403, GetClient(fd)->getNickname(), "#" + channel, GetClient(fd)->GetFd(), " :No such channel\r\n");
+            sendChannelerror(403, getClient(fd)->getNickname(), "#" + *channel, getClient(fd)->GetFd(), " :No such channel\r\n");
             continue;
         }
 
         // Проверяем, является ли пользователь администратором или участником канала
         if (!ch->get_client(fd) && !ch->get_admin(fd)) {
-            sendChannelerror(442, GetClient(fd)->getNickname(), "#" + channel, GetClient(fd)->GetFd(), " :You're not on that channel\r\n");
+            sendChannelerror(442, getClient(fd)->getNickname(), "#" + *channel, getClient(fd)->GetFd(), " :You're not on that channel\r\n");
             continue;
         }
 
         if (!ch->get_admin(fd)) {
-            sendChannelerror(482, GetClient(fd)->getNickname(), "#" + channel, GetClient(fd)->GetFd(), " :You're not channel operator\r\n");
+            sendChannelerror(482, getClient(fd)->getNickname(), "#" + *channel, getClient(fd)->GetFd(), " :You're not channel operator\r\n");
             continue;
         }
 
         // Проверяем, находится ли пользователь в канале
         if (!ch->FindClientInChannel(user)) {
-            sendChannelerror(441, GetClient(fd)->getNickname(), "#" + channel, GetClient(fd)->GetFd(), " :They aren't on that channel\r\n");
+            sendChannelerror(441, getClient(fd)->getNickname(), "#" + *channel, getClient(fd)->GetFd(), " :They aren't on that channel\r\n");
             continue;
         }
 
         // Формируем и отправляем сообщение об исключении
         std::stringstream ss;
-        ss << ":" << GetClient(fd)->getNickname() << "!~" << GetClient(fd)->getUserName() << "@" << "localhost" << " KICK #" << channel << " " << user;
+        ss << ":" << getClient(fd)->getNickname() << "!~" << getClient(fd)->getUserName() << "@" << "localhost" << " KICK #" << *channel << " " << user;
         if (!reason.empty())
             ss << " :" << reason << "\r\n";
         else
@@ -177,9 +176,9 @@ void Server::Kick(std::string cmd, int fd)
             ch->removeClient(ch->FindClientInChannel(user)->GetFd());
         }
 
-        // Удаляем канал, если он пуст
-        if (ch->GetNumberOfClients() == 0) {
-            channels.erase(std::remove(channels.begin(), channels.end(), ch), channels.end());
-        }
+        // Удаляем канал, если он пуст HE РАБОТАЕТ, НУЖНО ПЕРЕДЕЛАТЬ!!!!!
+        // if (ch->GetNumberOfClients() == 0) {
+        //     channels.erase(std::remove(channels.begin(), channels.end(), ch), channels.end());
+        // }
     }
 }

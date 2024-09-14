@@ -131,7 +131,7 @@ class Server
     void reciveDataFromClient(int fd);
     void reciveDataFromClients(int fd);
 
-	void 		_sendResponse(std::string response, int fd);
+	void 		_sendResponse(const std::string &response, int fd);
 
 	//---parsers
 
@@ -164,5 +164,7 @@ class Server
     void PivMSG(std::string cmd, int fd);
 	int parseMessage(std::string buffer, int fd);
 };
+
+typedef std::vector<std::pair<std::string, std::string> > TokenList;
 
 #endif // FT_IRC_SERVER_HPP

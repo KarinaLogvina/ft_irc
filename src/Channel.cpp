@@ -38,7 +38,7 @@ int Channel::GetTopic() { return this->topic;}
 int Channel::GetKey() { return this->key;}
 int Channel::GetLimit() { return this->limit;}
 int Channel::GetNumberOfClients() { return this->clients.size() + this->admins.size();}
-std::string Channel::GetChannelName() { return this->name;}
+std::string Channel::GetChannelName() const { return this->name;}
 std::string Channel::GetPassword() { return this->password;}
 std::string Channel::GetTimestamp() { return this->creationTime;}
 void Channel::SetInvitOnly(int invit_only){this->is_invite_only = invit_only;}
@@ -145,4 +145,7 @@ void Channel::sendToAllExcept(std::string rpl1, int fd){
   }
 }
 
-
+bool Channel::operator==(const Channel &other) const
+{
+  return this->GetChannelName() == other.GetChannelName();
+}

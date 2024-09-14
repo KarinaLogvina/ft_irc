@@ -1,4 +1,4 @@
-#include "includes/Server.hpp"
+#include "../includes/Server.hpp"
 
 
 std::string Server::getTopicTime() {
@@ -26,14 +26,14 @@ int Server::getPositionOfColon(std::string &cmd) {
 
 void Server::Topic(std::string &command, int &fd) {
     if (command == "TOPIC :") {
-        senderror(461, GetClient(fd)->getNickname(), fd, " :Not enough parameters\r\n");
+        senderror(461, getClient(fd)->getNickname(), fd, " :Not enough parameters\r\n");
         return;
     }
 
     std::vector<std::string> splitted_command = split_command(command);
 
     if (splitted_command.size() < 2) {
-        senderror(461, GetClient(fd)->getNickname(), fd, " :Not enough parameters\r\n");
+        senderror(461, getClient(fd)->getNickname(), fd, " :Not enough parameters\r\n");
         return;
     }
 
@@ -45,7 +45,7 @@ void Server::Topic(std::string &command, int &fd) {
         return;
     }
 
-    Client* client = GetClient(fd);
+    Client* client = getClient(fd);
 
     if (!channel->get_client(fd) && !channel->get_admin(fd)) {
         senderror(442, "#" + channelName, fd, " :You're not on that channel\r\n");
