@@ -69,7 +69,7 @@ int Server::SplitJoin(std::vector<std::pair<std::string, std::string> >& token, 
         }
     }
 
-    return 1;
+    return 0;
 }
 
 bool IsInvited(Client *client, std::string channelName, int flag){
@@ -181,5 +181,5 @@ for (size_t i = 0; i < token.size(); i++){
 		if (!flag)
 			JoinToNotExistingChannel(token, i, fd);
 	}
-    return 1;
+    return 0;
 }

@@ -24,17 +24,17 @@ int Server::getPositionOfColon(std::string &cmd) {
 }
 
 
-void Server::Topic(std::string &command, int &fd) {
+int Server::Topic(std::string &command, int fd) {
     if (command == "TOPIC :") {
         senderror(461, getClient(fd)->getNickname(), fd, " :Not enough parameters\r\n");
-        return;
+        return ERR;
     }
 
     std::vector<std::string> splitted_command = split_command(command);
 
     if (splitted_command.size() < 2) {
         senderror(461, getClient(fd)->getNickname(), fd, " :Not enough parameters\r\n");
-        return;
+        return ERR;
     }
 
     std::string channelName = splitted_command[1].substr(1);
@@ -42,14 +42,14 @@ void Server::Topic(std::string &command, int &fd) {
 
     if (!channel) {
         senderror(403, "#" + channelName, fd, " :No such channel\r\n");
-        return;
+        return ERR;
     }
 
     Client* client = getClient(fd);
 
     if (!channel->get_client(fd) && !channel->get_admin(fd)) {
         senderror(442, "#" + channelName, fd, " :You're not on that channel\r\n");
-        return;
+        return ERR;
     }
 
     // Если команда состоит из двух частей, вернуть текущую тему или сообщение об отсутствии темы
@@ -62,7 +62,7 @@ void Server::Topic(std::string &command, int &fd) {
             _sendResponse(topicResponse, fd);
             _sendResponse(timeResponse, fd);
         }
-        return;
+        return ERR;
     }
 
     // Обработка установки новой темы
@@ -77,13 +77,13 @@ void Server::Topic(std::string &command, int &fd) {
 
     if (newTopic == ":") {
         senderror(331, "#" + channelName, fd, " :No topic is set\r\n");
-        return;
+        return ERR;
     }
 
     // Проверка на привилегии для установки темы
     if (channel->GetTopicRestriction() && !channel->get_admin(fd)) {
         senderror(482, "#" + channelName, fd, " :You're Not a channel operator\r\n");
-        return;
+        return ERR;
     }
 
     // Установка новой темы и времени
@@ -92,4 +92,5 @@ void Server::Topic(std::string &command, int &fd) {
 
     std::string response = ":" + client->getNickname() + "!" + client->getUserName() + "@localhost TOPIC #" + channelName + " " + newTopic + "\r\n";
     channel->sendToAll(response);
+    return 0;
 }

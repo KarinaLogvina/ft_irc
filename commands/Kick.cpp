@@ -83,7 +83,7 @@ std::string Server::SplitCmdKick(std::string cmd, std::vector<std::string> &temp
 }
 
 
-void Server::Kick(std::string cmd, int fd)
+int Server::Kick(std::string cmd, int fd)
 {
     std::vector<std::string> tmp;
     std::string user, reason;
@@ -94,7 +94,7 @@ void Server::Kick(std::string cmd, int fd)
     // Проверяем, указаны ли все необходимые параметры
     if (tmp.size() < 3) {
         senderror(461, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :Not enough parameters\r\n");
-        return;
+        return ERR;
     }
 
     // Извлекаем имена каналов и пользователя
@@ -181,4 +181,5 @@ void Server::Kick(std::string cmd, int fd)
         //     channels.erase(std::remove(channels.begin(), channels.end(), ch), channels.end());
         // }
     }
+    return 0;
 }

@@ -53,7 +53,7 @@ void Server::handleClientQuit(int fd, const std::string& reason, Channel& channe
     }
 }
 
-void Server::Quit(std::string command, int &fd) {
+int Server::Quit(std::string command, int fd) {
     std::string reason = SplitQuitCommand(command);
 
     for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); it++) {
@@ -67,5 +67,6 @@ void Server::Quit(std::string command, int &fd) {
     removeClient(fd);
     removeFds(fd);
     close(fd);
+    return 0;
 }
 

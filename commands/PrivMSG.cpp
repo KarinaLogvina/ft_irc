@@ -130,5 +130,5 @@ int Server::PivMSG(std::string cmd, int fd) {
             _sendResponse(response, GetClientByNickname(*target)->GetFd());
         }
     }
-    return 1;
+    return 0;
 }
