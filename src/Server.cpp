@@ -380,6 +380,8 @@ int Server::handleCommands(Client &client)
 	commandMap["PRIVMSG"] = &Server::handlePrivMsg;
 	if (client_msg.command == "JOIN")
 		return Join(client_msg.raw, client.GetFd());
+	if (client_msg.command == "PRIVMSG")
+		return PivMSG(client_msg.raw, client.GetFd());
 	/* Can do it with the switch? */
 	it = commandMap.find(client_msg.command);
 	if (it != commandMap.end())

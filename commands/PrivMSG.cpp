@@ -96,26 +96,26 @@ void Server::CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd) {
 }
 
 
-void Server::PivMSG(std::string cmd, int fd) {
+int Server::PivMSG(std::string cmd, int fd) {
     std::vector<std::string> targets;
     std::string message = ParsePrivmsgTargetsAndMessage(cmd, targets);
 
     // Проверка на наличие получателей
     if (targets.empty()) {
         senderror(411, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :No recipient given (PRIVMSG)\r\n");
-        return;
+        return ERR;
     }
 
     // Проверка на наличие текста сообщения
     if (message.empty()) {
         senderror(412, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :No text to send\r\n");
-        return;
+        return ERR;
     }
 
     // Проверка на слишком большое количество получателей
     if (targets.size() > 10) {
         senderror(407, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :Too many recipients\r\n");
-        return;
+        return ERR;
     }
 
     CheckForChannelsAndClients(targets, fd); // Проверка существования каналов и клиентов
@@ -130,4 +130,5 @@ void Server::PivMSG(std::string cmd, int fd) {
             _sendResponse(response, GetClientByNickname(*target)->GetFd());
         }
     }
+    return 1;
 }

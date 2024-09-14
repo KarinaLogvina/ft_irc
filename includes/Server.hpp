@@ -162,7 +162,7 @@ class Server
     void handleClientQuit(int fd, const std::string &reason, Channel &channel);
     void Quit(std::string command, int &fd);
     void CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd);
-    void PivMSG(std::string cmd, int fd);
+    int PivMSG(std::string cmd, int fd);
 	int parseMessage(std::string buffer, int fd);
 };
 
