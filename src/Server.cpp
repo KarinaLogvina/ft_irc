@@ -332,6 +332,8 @@ void Server::parseTokens(const std::string &message)
 				sizeof(this->client_msg)); // change for safe variant
 
 	std::istringstream iss_line(message);
+
+	client_msg.raw = message;
 	// Check for prefix
 	if (message[0] == ':')
 	{
@@ -376,6 +378,8 @@ int Server::handleCommands(Client &client)
 	commandMap["USER"] = &Server::handleUser;
 	commandMap["PING"] = &Server::handlePong;
 	commandMap["PRIVMSG"] = &Server::handlePrivMsg;
+	if (client_msg.command == "JOIN")
+		return Join(client_msg.raw, client.GetFd());
 	/* Can do it with the switch? */
 	it = commandMap.find(client_msg.command);
 	if (it != commandMap.end())

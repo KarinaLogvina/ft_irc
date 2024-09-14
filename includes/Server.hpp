@@ -50,6 +50,7 @@ class Server
 		std::string command;
 		std::vector<std::string> params;
 		std::string trailing;
+		std::string raw;
 	} client_msg;
 
 	void parseTokens(const std::string &message);
@@ -143,7 +144,7 @@ class Server
 	  void sendChannelerror(int code, std::string clientname, std::string channelname, int fd, std::string message);
 
     //---CMD
-    void Join(std::string cmd, int fd);
+    int Join(std::string cmd, int fd);
     int  SplitJoin(std::vector<std::pair<std::string, std::string> >& token, std::string cmd, int fd);
     int SearchClient(const std::string &nickname);
     int HowManyChannelsClientHas(std::string nick);

@@ -160,15 +160,15 @@ int Server::HowManyChannelsClientHas(std::string nick) {
     return c;
 }
 
-void Server::Join (std::string command, int fd) {
+int Server::Join (std::string command, int fd) {
 	std::vector<std::pair<std::string, std::string> > token;
     if(!SplitJoin(token, command, fd)) {
         senderror(461, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :Not enough parameters\r\n");
-        return;
+        return ERR;
     }
     if(token.size() > 10) {
 		senderror(407, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :Too many channels\r\n"); 
-        return;
+        return ERR;
     }
 for (size_t i = 0; i < token.size(); i++){
 		bool flag = false;
@@ -181,4 +181,5 @@ for (size_t i = 0; i < token.size(); i++){
 		if (!flag)
 			JoinToNotExistingChannel(token, i, fd);
 	}
+    return 1;
 }
