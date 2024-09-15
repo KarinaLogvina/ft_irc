@@ -22,7 +22,7 @@ int Server::SplitJoin(std::vector<std::pair<std::string, std::string> >& token, 
     // Check if there are enough parts
     if (parts.size() < 2) {
         token.clear();
-        return 0;
+        return ERR;
     }
 
     // Extract channel and password strings
@@ -162,7 +162,7 @@ int Server::HowManyChannelsClientHas(std::string nick) {
 
 int Server::Join (std::string command, int fd) {
 	std::vector<std::pair<std::string, std::string> > token;
-    if(!SplitJoin(token, command, fd)) {
+    if(SplitJoin(token, command, fd)) {
         senderror(461, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :Not enough parameters\r\n");
         return ERR;
     }
