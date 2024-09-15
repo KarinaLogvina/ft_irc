@@ -1,4 +1,5 @@
 #include "../includes/Channel.hpp"
+#include "Channel.hpp"
 
 Channel::Channel(){
   this->topic = 0;
@@ -11,6 +12,9 @@ Channel::Channel(){
   this->topicName = "";
   this->is_invite_only = 0;
   this->topic_restriction = false;
+  char charaters[5] = {'i', 't', 'k', 'o', 'l'};
+  for(int i = 0; i < 5; i++)
+		modes.push_back(std::make_pair(charaters[i],false));
 }
 
 Channel::~Channel(){};
@@ -30,6 +34,7 @@ Channel &Channel::operator=(Channel const &src){
     this->admins = src.admins;
     this->createdTime = src.createdTime;
     this->is_invite_only = src.is_invite_only;
+    this->modes = src.modes;
   }
   return *this;
 }
@@ -144,5 +149,79 @@ void Channel::sendToAllExcept(std::string rpl1, int fd){
               std::cerr << "send() faild" << std::endl;
   }
 }
+
+bool Channel::getModeAtindex(size_t index){
+  return modes[index].second;
+}
+
+void Channel::setModeAtindex(size_t index, bool mode){
+  modes[index].second = mode;
+}
+
+void Channel::setTopicRestriction(bool value){
+  this->topic_restriction = value;
+  }
+
+bool Channel::clientInChannel(std::string &nick) {
+    auto isNickMatch = [&nick](Client& client) {
+        return client.getNickname() == nick;
+    };
+
+    return std::any_of(clients.begin(), clients.end(), isNickMatch) ||
+           std::any_of(admins.begin(), admins.end(), isNickMatch);
+}
+
+bool Channel::changeClientToAdmin(std::string& nick) {
+    std::vector<Client>::iterator it;
+    for (it = clients.begin(); it != clients.end(); ++it) {
+        if (it->getNickname() == nick) {
+            break;
+        }
+    }
+
+    if (it != clients.end()) {
+        admins.push_back(*it);
+
+        clients.erase(it);
+        
+        return true;
+    }
+    return false;
+}
+
+
+bool Channel::changeAdminToClient(std::string& nick) {
+    std::vector<Client>::iterator it;
+    for (it = admins.begin(); it != admins.end(); ++it) {
+        if (it->getNickname() == nick) {
+            break;
+        }
+    }
+
+    if (it != admins.end()) {
+        clients.push_back(*it);
+
+        admins.erase(it);
+        
+        return true;
+    }
+
+    return false;
+}
+
+
+std::string Channel::getModes() const {
+    std::string mode;
+    for (std::vector<std::pair<char, bool> >::const_iterator it = modes.begin(); it != modes.end(); ++it) {
+        if (it->first != 'o' && it->second) {
+            mode.push_back(it->first);
+        }
+    }
+    if (!mode.empty()) {
+        mode.insert(mode.begin(), '+');
+    }
+    return mode;
+}
+
 
 

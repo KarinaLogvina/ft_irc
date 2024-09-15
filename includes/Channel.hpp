@@ -23,6 +23,7 @@ class Channel {
     bool topic_restriction;
     std::vector<Client> clients;
     std::vector<Client> admins;
+    std::vector<std::pair<char, bool>> modes;
 
   public:
     Channel();
@@ -62,11 +63,17 @@ class Channel {
   	void SetName(std::string name);
     void setCreateiontime();
     bool changeClientToAdmin(std::string &nickname);
+    bool changeAdminToClient(std::string &nick);
+    std::string getModes() const;
     bool removeClientAdminStatus(std::string &nickname);
 
     void sendToAll(std::string replay);
     void sendToAllExcept(std::string rpl1, int fd);
+    bool getModeAtindex(size_t index);
+    void setModeAtindex(size_t index, bool mode);
+    void setTopicRestriction(bool value);
 
+    bool clientInChannel(std::string &nick);
 };
 
 #endif //FT_IRC_CHANNEL_HPP

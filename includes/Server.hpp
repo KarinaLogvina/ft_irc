@@ -118,6 +118,18 @@ class Server {
     void Quit(std::string command, int &fd);
     void CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd);
     void PivMSG(std::string command, int fd);
+    bool isvalidLimit(const std::string &limit);
+    std::string channelLimit(std::vector<std::string> tokens, Channel *channel, std::vector<std::string>::size_type &pos, char operation, int fd, std::string &chain, std::string &arguments);
+    std::string modeToAppend(const std::string &chain, char operation, char mode);
+    void parseCommand(const std::string &command, std::string &name, std::string &modeSet, std::string &params);
+    std::vector<std::string> splitParams(const std::string &params);
+    std::string inviteOnly(Channel *channel, char operation, const std::string &chain);
+    std::string topicRestriction(Channel *channel, char operation, const std::string &chain);
+    std::string passwordMode(std::vector<std::string> tokens, Channel *channel, size_t &pos, char operation, int fd, std::stringstream &mode_chain, std::string &arguments);
+    std::string operatorPrivilege(std::vector<std::string> tokens, Channel *channel, size_t &pos, int fd, char operation, std::string &chain, std::string &arguments);
+    void Mode(std::string &command, int fd);
+    std::string modeToAppend(const std::stringstream& chain, char operation, char mode);
+
 };
 
 #endif //FT_IRC_SERVER_HPP

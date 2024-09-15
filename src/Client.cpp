@@ -51,12 +51,12 @@ void Client::setBuffer(std::string recived){buffer += recived;}
 
 //--utils--
 
-void Client::clearBuffer() {buffer.clear()};
+void Client::clearBuffer() {buffer.clear();}
 
 bool Client::getInviteChannel(std::string &channelName) {
     for(size_t i =0; i < this->ChannelsInvitation.size(); i++) {
         if(this->ChannelsInvitation[i] == channelName) {
-            return true
+            return true;
         }
     }
     return false;
@@ -66,7 +66,7 @@ void Client::addChannelInvite(std::string &channelName) {
 }
 
 void Client::removeChannelInvite(std::string &channelName) {
-  for (size_t i = 0; i < this->ChannelsInvite.size(); i++){
+  for (size_t i = 0; i < this->ChannelsInvitation.size(); i++){
     if (this->ChannelsInvitation[i] == channelName)
     {this->ChannelsInvitation.erase(this->ChannelsInvitation.begin() + i); return;}
   }
