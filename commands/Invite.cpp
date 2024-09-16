@@ -44,7 +44,7 @@ int Server::Invite(std::string &cmd, int fd) {
   client->addChannelInvite(channelname);
   std::string responde1 = "341 " + getClient(fd)->getNickname() + " " + client->getNickname() + " " + s_cmd[2]+"\r\n";
   _sendResponse(responde1, fd);
-  std::string responde2 = " :" + client->getHostname() + " INVITE " + client->getNickname() + " " + s_cmd[2]+"\r\n";
+  std::string responde2 = ":" + getClient(fd)->getHostname() + " INVITE " + client->getNickname() + " :" + s_cmd[2]+"\r\n";
   _sendResponse(responde2, client->GetFd());
   return 0;
 }

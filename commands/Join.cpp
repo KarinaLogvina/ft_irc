@@ -107,7 +107,7 @@ void Server::JoinToExistingChannel(std::vector<std::pair<std::string, std::strin
     Client *cli = getClient(fd);
 	this->channels[j].addClient(*cli);
 
-     std::string joinMsg = RPL_JOINMSG(getClient(fd)->getHostname(), getClient(fd)->getIpAdd(), channels[j].GetChannelName());
+     std::string joinMsg = RPL_JOINMSG(getClient(fd)->getHostname(), channels[j].GetChannelName());
     if (channels[j].GetTopicName().empty()) {
         _sendResponse(joinMsg + 
                       RPL_NAMREPLY(getClient(fd)->getNickname(), channels[j].GetChannelName(), channels[j].clientChannel_list()) + 
@@ -134,7 +134,7 @@ void Server::JoinToNotExistingChannel(std::vector<std::pair<std::string, std::st
 	newChannel.setCreateiontime();
 	this->channels.push_back(newChannel);
 	// notifiy thet the client joined the channel
-    _sendResponse(RPL_JOINMSG(getClient(fd)->getHostname(),getClient(fd)->getIpAdd(),newChannel.GetChannelName()) + \
+    _sendResponse(RPL_JOINMSG(getClient(fd)->getHostname(),newChannel.GetChannelName()) + \
         RPL_NAMREPLY(getClient(fd)->getNickname(),newChannel.GetChannelName(),newChannel.clientChannel_list()) + \
         RPL_ENDOFNAMES(getClient(fd)->getNickname(),newChannel.GetChannelName()),fd);
 }

@@ -46,7 +46,7 @@ std::string Client::getNickname()
 };
 std::string Client::getUserName() {return this->username;};
 std::string Client::getHostname(){
-	std::string hostname = this->getNickname() + "!" + this->getUserName();
+	std::string hostname = this->getNickname() + "!" + this->getUserName() + "@localhost";
 	return hostname;
 }
 std::string Client::getBuffer() {return buffer;}
