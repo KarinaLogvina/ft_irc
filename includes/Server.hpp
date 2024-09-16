@@ -173,11 +173,12 @@ class Server
     std::string topicRestriction(Channel *channel, char operation, const std::string &chain);
     std::string passwordMode(std::vector<std::string> tokens, Channel *channel, size_t &pos, char operation, int fd, std::stringstream &mode_chain, std::string &arguments);
     std::string operatorPrivilege(std::vector<std::string> tokens, Channel *channel, size_t &pos, int fd, char operation, std::string &chain, std::string &arguments);
-    void Mode(std::string &command, int fd);
+    int Mode(std::string &command, int fd);
     std::string modeToAppend(const std::stringstream& chain, char operation, char mode);
 
 };
 
 typedef std::vector<std::pair<std::string, std::string> > TokenList;
+bool validPassword(const std::string& password);
 
 #endif // FT_IRC_SERVER_HPP

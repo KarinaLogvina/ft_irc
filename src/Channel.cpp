@@ -44,7 +44,7 @@ int Channel::GetLimit() { return this->limit;}
 int Channel::GetNumberOfClients() { return this->clients.size() + this->admins.size();}
 std::string Channel::GetChannelName() const { return this->name;}
 std::string Channel::GetPassword() { return this->password;}
-std::string Channel::GetTimestamp() { return this->creationTime;}
+std::string Channel::GetTimestamp() { return this->createdAt;}
 void Channel::SetInvitOnly(int invit_only){this->is_invite_only = invit_only;}
 void Channel::SetTopic(int topic){this->topic = topic;}
 void Channel::SetTime(std::string time){this->creationTime = time;}
@@ -162,12 +162,19 @@ void Channel::setTopicRestriction(bool value){
   }
 
 bool Channel::clientInChannel(std::string &nick) {
-    auto isNickMatch = [&nick](Client& client) {
-        return client.getNickname() == nick;
-    };
+    for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it) {
+        if (it->getNickname() == nick) {
+            return true;
+        }
+    }
 
-    return std::any_of(clients.begin(), clients.end(), isNickMatch) ||
-           std::any_of(admins.begin(), admins.end(), isNickMatch);
+    for (std::vector<Client>::iterator it = admins.begin(); it != admins.end(); ++it) {
+        if (it->getNickname() == nick) {
+            return true;
+        }
+    }
+
+    return false; // Return false if no match was found in both lists
 }
 
 bool Channel::changeClientToAdmin(std::string& nick) {

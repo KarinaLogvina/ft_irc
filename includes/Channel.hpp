@@ -23,7 +23,7 @@ class Channel {
     bool topic_restriction;
     std::vector<Client> clients;
     std::vector<Client> admins;
-    std::vector<std::pair<char, bool>> modes;
+    std::vector<std::pair<char, bool> > modes;
 
   public:
     Channel();

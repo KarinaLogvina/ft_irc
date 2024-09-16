@@ -390,6 +390,8 @@ int Server::handleCommands(Client &client)
 		return Quit(client_msg.raw, client.GetFd());
 	if (client_msg.command == "TOPIC")
 		return Topic(client_msg.raw, client.GetFd());
+	if (client_msg.command == "MODE")
+		return Mode(client_msg.raw, client.GetFd());
 	/* Can do it with the switch? */
 	it = commandMap.find(client_msg.command);
 	if (it != commandMap.end())

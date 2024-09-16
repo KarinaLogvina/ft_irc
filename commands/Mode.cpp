@@ -186,7 +186,7 @@ std::string Server::channelLimit(std::vector<std::string> tokens, Channel* chann
 }
 
 // Processes the mode command
-void Server::Mode(std::string& command, int fd) {
+int Server::Mode(std::string& command, int fd) {
     std::string channelName;
     std::string params;
     std::string modeset;
@@ -197,14 +197,14 @@ void Server::Mode(std::string& command, int fd) {
 
     arguments = "";
     mode_chain.str("");
-    Client* client = GetClient(fd);
+    Client* client = getClient(fd);
     std::string::size_type found = command.find_first_not_of("MODEmode \t\v");
 
     if (found != std::string::npos) {
         command = command.substr(found);
     } else {
         _sendResponse(ERR_NOTENOUGHTPARAMS(client->getNickname()), fd);
-        return;
+        return ERR;
     }
 
     parseCommand(command, channelName, modeset, params);
@@ -212,18 +212,18 @@ void Server::Mode(std::string& command, int fd) {
 
     if (channelName[0] != '#' || !(channel = GetChannel(channelName.substr(1)))) {
         _sendResponse(ERR_CHANNELNOTFOUND(client->getUserName(), channelName), fd);
-        return;
+        return ERR;
     } else if (!channel->get_client(fd) && !channel->get_admin(fd)) {
         sendChannelerror(442, client->getNickname(), channelName, client->GetFd(), " :You're not on that channel\r\n");
-        return;
+        return ERR;
     } else if (modeset.empty()) {
         _sendResponse(
             RPL_CHANNELMODES(client->getNickname(), channel->GetChannelName(), channel->getModes()) +
             RPL_CREATIONTIME(client->getNickname(), channel->GetChannelName(), channel->GetTimestamp()), fd);
-        return;
+        return ERR;
     } else if (!channel->get_admin(fd)) {
         _sendResponse(ERR_NOTOPERATOR(channel->GetChannelName()), fd);
-        return;
+        return ERR;
     }
 
     std::string::size_type pos = 0;
@@ -248,4 +248,5 @@ void Server::Mode(std::string& command, int fd) {
     if (!finalChain.empty()) {
         channel->sendToAll(RPL_CHANGEMODE(client->getHostname(), channel->GetChannelName(), finalChain, arguments));
     }
+    return 0;
 }
