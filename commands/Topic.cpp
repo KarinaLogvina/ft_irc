@@ -82,7 +82,7 @@ int Server::Topic(std::string &command, int fd) {
 
     // Проверка на привилегии для установки темы
     if (channel->GetTopicRestriction() && !channel->get_admin(fd)) {
-        senderror(482, "#" + channelName, fd, " :You're Not a channel operator\r\n");
+        _sendResponse(ERR_CHANOPRIVSNEEDED(getClient(fd)->getNickname(), channelName), fd);
         return ERR;
     }
 

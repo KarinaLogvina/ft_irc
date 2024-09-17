@@ -9,42 +9,40 @@ ERR_USERONCHANNEL (443)*/
 
 int Server::Invite(std::string &cmd, int fd) {
   std::vector<std::string> s_cmd = split_command(cmd);
+  std::string clientNick = getClient(fd)->getNickname();
   if (s_cmd.size() < 3) {
-    senderror(461, getClient(fd)->getNickname(), fd, ": Not enough parameters\r\n");
+    senderror(461, clientNick, fd, ": Not enough parameters\r\n");
     return ERR;
   }
   std::string channelname = s_cmd[2].substr(1);
-  if (s_cmd[2][0] != '#' || !GetChannel(channelname)) {
-    senderror(403, getClient(fd)->getNickname(), fd, ": Channel no found\r\n");
+  Channel * channel = GetChannel(channelname);
+  if (s_cmd[2][0] != '#' || channel == NULL) {
+    senderror(403, clientNick, fd, ": Channel not found\r\n");
     return ERR;
   }
-  if(!(GetChannel(channelname)->get_client(fd)) && !(GetChannel(channelname)->get_admin(fd))) {
-    senderror(403, getClient(fd)->getNickname(), fd, ": You are not member of channel\r\n");
+  if(!(channel->get_client(fd)) && !(channel->get_admin(fd))) {
+    senderror(403, clientNick, fd, ": You are not member of channel\r\n");
     return ERR;
   }
-  if(GetChannel(channelname)->FindClientInChannel(s_cmd[1])) {
-    senderror(443, getClient(fd)->getNickname(), fd, ": This user is already member of this channel\r\n");
+  if(channel->FindClientInChannel(s_cmd[1])) {
+    senderror(443, clientNick, fd, ": This user is already member of this channel\r\n");
     return ERR;
   }
-  Client *client = GetClientByNickname(s_cmd[1]);
-  if(!client) {
+  Client *invitee = GetClientByNickname(s_cmd[1]);
+  if(!invitee) {
     //must be error 401, fix asap and remake senderror function
-    senderror(403, getClient(fd)->getNickname(), fd, ":No such user\r\n");
+    senderror(403, clientNick, fd, ":No such user\r\n");
     return ERR; 
   }
-  if (GetChannel(channelname)->GetInvitOnly() && !GetChannel(channelname)->get_admin(fd)){
-    sendChannelerror(482, GetChannel(channelname)->get_client(fd)->getNickname(), s_cmd[1], fd, ": You are not have rights to invite user\r\n");
+  if (channel->GetInvitOnly() && !channel->get_admin(fd)){
+    sendChannelerror(482, channel->get_admin(fd)->getNickname(), s_cmd[2], fd, ": You don't have rights to invite users\r\n");
     return ERR; 
-  }
-  if(GetChannel(channelname)->GetLimit() && GetChannel(channelname)->GetNumberOfClients() >= GetChannel(channelname)->GetLimit()) {
-    sendChannelerror(482, GetChannel(channelname)->get_client(fd)->getNickname(), s_cmd[1], fd, ": Channel is full of users.\r\n");
-    return ERR;
   }
   
-  client->addChannelInvite(channelname);
-  std::string responde1 = "341 " + getClient(fd)->getNickname() + " " + client->getNickname() + " " + s_cmd[2]+"\r\n";
+  invitee->addChannelInvite(channelname);
+  std::string responde1 = "341 " + clientNick + " " + invitee->getNickname() + " " + s_cmd[2]+"\r\n";
   _sendResponse(responde1, fd);
-  std::string responde2 = ":" + getClient(fd)->getHostname() + " INVITE " + client->getNickname() + " :" + s_cmd[2]+"\r\n";
-  _sendResponse(responde2, client->GetFd());
+  std::string responde2 = ":" + getClient(fd)->getHostname() + " INVITE " + invitee->getNickname() + " :" + s_cmd[2]+"\r\n";
+  _sendResponse(responde2, invitee->GetFd());
   return 0;
 }

@@ -648,8 +648,8 @@ void Server::senderror(int code, std::string clientname, int fd, std::string mes
 };
 
 void Server::sendChannelerror(int code, std::string clientname, std::string channelname, int fd, std::string message) {
-		std::stringstream stringStream;
-	stringStream << ":localhost " << code << " " << clientname << channelname << message;
+	std::stringstream stringStream;
+	stringStream << code << " " << clientname << " " << channelname << message;
 	std::string response = stringStream.str();
 	if(send(fd, response.c_str(), response.size(),0) == -1)
 		std::cerr << "send() faild" << std::endl;

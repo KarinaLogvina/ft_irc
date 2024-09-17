@@ -96,8 +96,8 @@ void Server::JoinToExistingChannel(std::vector<std::pair<std::string, std::strin
 	}
     if (this->channels[j].GetInvitOnly()){// ERR_INVITEONLYCHAN (473) // if the channel is invit only
 		if (!IsInvited(getClient(fd), token[i].first, 1)) {
-            senderror(473, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :Cannot join channel (+i)\r\n");
-             return;
+            _sendResponse(ERR_INVITEONLYCHAN(getClient(fd)->getNickname(), channels[j].GetChannelName()), fd);
+             return ;
         }
 	}
     if (this->channels[j].GetLimit() && this->channels[j].GetNumberOfClients() >= this->channels[j].GetLimit()){
