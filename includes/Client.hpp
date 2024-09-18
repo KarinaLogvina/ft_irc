@@ -18,6 +18,7 @@ class Client {
     int fd;
     bool is_registered;
     bool is_logged_in;
+    bool is_operator;
     std::vector<std::string> ChannelsInvitation;
 
     std::string nickname;
@@ -42,6 +43,7 @@ class Client {
     std::string getNickname();
     std::string getUserName();
     std::string getIpAdd();
+    bool getIsOperator();
     std::string getHostname();
     std::string getBuffer();
     bool getInviteChannel(std::string &channelName);
@@ -50,17 +52,16 @@ class Client {
     void setFd(int fd);
     void setIpAdd(std::string ipadd);
     void SetNickName(std::string& nickname);
-	void SetUserName(std::string &username);
-	void SetIsLoggedIn(bool value);
+    void SetUserName(std::string &username);
+    void SetIsLoggedIn(bool value);
     void SetIsRegistered(bool value);
     void setBuffer(std::string revieced_line);
+    void setIsOperator(bool value);
 
     //----utils----
     void clearBuffer();
     void addChannelInvite(std::string &channelName);
     void removeChannelInvite(std::string &channelName);
-
-
 };
 
 #endif //FT_IRC_CLIENT_HPP

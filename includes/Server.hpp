@@ -60,9 +60,11 @@ class Server
 	void disconnect_client(int fd);
 	void add_fd(int socket);
 	int parse_messages(std::string commands, int i);
-	void welcomeClient(Client &client);
+    int parseMessageCommand(std::string buffer, int fd);
+    bool isCommand(const std::string &token);
+    void welcomeClient(Client &client);
 
-	// commands
+    // commands
 	int handleCommands(Client &client);
 	int handlePass(Client &client);
 	int handleNick(Client &client);
@@ -91,8 +93,8 @@ class Server
 	Client *getClient(int fd);
     std::string getTopicTimestamp();
 	Client *GetClientByNickname(std::string nickname);
-	Channel *GetChannel(std::string name);
-	time_t *getCreatedAt();
+    Channel *GetChannel(std::string name);
+    time_t *getCreatedAt();
 
 	size_t getNumberOfClients();
 
@@ -118,9 +120,9 @@ class Server
 	// removers
 	void removeChannel(std::string name);
 	void removeChannels(int fd);
-	void removeClient(int fd);
-	void removeFd(int fd);
-    void removeFds(int fd);
+    std::string getClientIdentifier(int fd);
+    void removeClient(int fd);
+    void removeFd(int fd);
 
 	// Signals
 
@@ -155,15 +157,14 @@ class Server
     std::string getTopic(std::string &input);
     int getPositionOfColon(std::string &cmd);
     int Topic(std::string &command, int fd);
-    void ParseCommand(std::string &command, int &fd);
     std::string SplitKickCommand(std::string command, std::vector<std::string> &temp, std::string &user, int fd);
     std::string SplitCmdKick(std::string cmd, std::vector<std::string> &tmp, std::string &user, int fd);
     int Kick(std::string cmd, int fd);
     void handleClientQuit(int fd, const std::string &reason, Channel &channel);
     int Quit(std::string command, int fd);
-    void CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd);
     int PivMSG(std::string command, int fd);
-	int parseMessage(std::string buffer, int fd);
+    bool isChannelName(const std::string &name);
+    int parseMessage(std::string buffer, int fd);
     bool isvalidLimit(const std::string &limit);
     std::string channelLimit(std::vector<std::string> tokens, Channel *channel, std::vector<std::string>::size_type &pos, char operation, int fd, std::string &chain, std::string &arguments);
     std::string modeToAppend(const std::string &chain, char operation, char mode);
@@ -175,7 +176,7 @@ class Server
     std::string operatorPrivilege(std::vector<std::string> tokens, Channel *channel, size_t &pos, int fd, char operation, std::string &chain, std::string &arguments);
     int Mode(std::string &command, int fd);
     std::string modeToAppend(const std::stringstream& chain, char operation, char mode);
-
+    void CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd);
 };
 
 typedef std::vector<std::pair<std::string, std::string> > TokenList;

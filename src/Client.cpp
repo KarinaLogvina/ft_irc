@@ -1,4 +1,5 @@
 #include "../includes/Client.hpp"
+#include "Client.hpp"
 
 Client::Client() {
     this->fd = -1;
@@ -7,6 +8,7 @@ Client::Client() {
     this->username = "";
     this->is_logged_in = false;
     this->is_registered = false;
+    this->is_operator = false;
     this->ipadd = "";
 }
 
@@ -28,6 +30,7 @@ Client&Client::operator=(Client const &src) {
         this->is_registered = src.is_registered;
         this->ipadd = src.ipadd;
         this->ChannelsInvitation = src.ChannelsInvitation;
+        this->is_operator = src.is_operator;
     }
     return *this;
 };
@@ -51,6 +54,7 @@ std::string Client::getHostname(){
 }
 std::string Client::getBuffer() {return buffer;}
 std::string Client::getIpAdd() {return ipadd;}
+bool			Client::getIsOperator() { return (this->is_operator); };
 
 //---setters---
 void Client::setFd(int fd) {this->fd = fd;}
@@ -61,11 +65,11 @@ void Client::SetUserName(std::string &username)
 	this->username = username;
 }
 void Client::SetIsLoggedIn(bool value) {this->is_logged_in = value;}
-void Client::SetIsRegistered(bool value)
-{
+void Client::SetIsRegistered(bool value){
 	this->is_registered = value;
 }
 void Client::setBuffer(std::string recived){this->buffer += recived;}
+void Client::setIsOperator(bool value) {this->is_operator = value;};
 
 //--utils--
 

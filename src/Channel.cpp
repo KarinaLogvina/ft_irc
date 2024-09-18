@@ -1,4 +1,5 @@
 #include "../includes/Channel.hpp"
+#include "Channel.hpp"
 
 Channel::Channel(){
   this->topic = 0;
@@ -52,7 +53,14 @@ void Channel::SetKey(int key){this->key = key;}
 void Channel::SetLimit(int limit){this->limit = limit;}
 void Channel::SetTopicName(std::string topic_name){this->topicName = topic_name;}
 void Channel::SetPassword(std::string password){this->password = password;}
-void Channel::SetName(std::string name){this->name = name;}
+void Channel::SetName(std::string& name) {
+    if (!name.empty() && (name[0] == '#' || name[0] == '&')) {
+        this->name = name;  // Name already has a prefix
+    } else {
+        this->name = "#" + name;  // Add '#' prefix
+    }
+}
+
 void Channel::setCreateiontime(){
 	std::time_t _time = std::time(NULL);
 	std::ostringstream oss;
@@ -127,7 +135,7 @@ void Channel::removeAdmin(int fd) {
   }
 }
 
-void Channel::sendToAll(std::string rpl1){
+void Channel::sendToAll(std::string rpl1) {
   for(size_t i = 0; i < admins.size(); i++)
       if(send(admins[i].GetFd(), rpl1.c_str(), rpl1.size(),0) == -1)
           std::cerr << "send() faild" << std::endl;

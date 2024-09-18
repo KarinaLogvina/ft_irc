@@ -14,9 +14,9 @@
 #define ERR_CHANOPRIVSNEEDED(nickname, channelname) ("482 " + nickname + " #" + channelname + " :You're not channel operator" + CRLF)
 
 // Responses
-#define RPL_JOINMSG(hostname, channelname) (":" + (hostname) + " JOIN #" + (channelname) + CRLF)
-#define RPL_NAMREPLY(nickname, channelname, clientslist) ("353 " + (nickname) + " = #" + (channelname) + " :" + (clientslist) + CRLF)
-#define RPL_ENDOFNAMES(nickname, channelname) ("366 " + (nickname) + " #" + (channelname) + " :END of /NAMES list" + CRLF)
+#define RPL_JOINMSG(nick, hostname, channelname) (":" + nick + "@" + hostname + " JOIN " + channelname + CRLF)
+#define RPL_NAMREPLY(nickname, channelname, names) ("353 " + nickname + " = " + channelname + " :" + names + CRLF)
+#define RPL_ENDOFNAMES(nickname, channelname) ("366 " + nickname + " " + channelname + " :END of /NAMES list" + CRLF)
 #define RPL_TOPICIS(nickname, channelname, topic) ("332 " + (nickname) + " #" + (channelname) + " :" + (topic) + CRLF)
 #define RPL_CHANNELMODES(nick, channelname, modes) ("324 " + (nick) + " #" + (channelname) + " :" + (modes) + CRLF)
 #define RPL_CREATIONTIME(nick, channelname, timestamp) ("329 " + (nick) + " #" + (channelname) + " :" + (timestamp) + CRLF)

@@ -65,7 +65,7 @@ int Server::Quit(std::string command, int fd) {
     std::cout << "Client <" << fd << "> Disconnected" << std::endl;
     removeChannels(fd);
     removeClient(fd);
-    removeFds(fd);
+    removeFd(fd);
     close(fd);
     return 0;
 }

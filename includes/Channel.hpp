@@ -61,7 +61,7 @@ class Channel {
   	void SetLimit(int limit);
   	void SetTopicName(std::string topic_name);
   	void SetPassword(std::string password);
-  	void SetName(std::string name);
+    void SetName(std::string &name);
     void setCreateiontime();
     bool changeClientToAdmin(std::string &nickname);
     bool changeAdminToClient(std::string &nick);
