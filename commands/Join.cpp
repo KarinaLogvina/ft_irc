@@ -93,6 +93,7 @@ int Server::SplitJoin(std::vector<std::pair<std::string, std::string> >& token, 
             senderror(403, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :No such channel\r\n");
             it = token.erase(it);
         } else {
+            it->first = it->first.substr(1);
             ++it;
         }
     }
@@ -164,6 +165,9 @@ void Server::JoinToNotExistingChannel(std::vector<std::pair<std::string, std::st
         return;
     }
     Channel newChannel;
+    std::cout << token[i].first << std::endl;
+    std::cout << "here" << std::endl;
+
     newChannel.SetName(token[i].first);
     newChannel.addAdmin(*cli);
     newChannel.addClient(*cli); // Add client to client list

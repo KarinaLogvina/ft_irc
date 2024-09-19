@@ -5,3 +5,4 @@ objs/
 *.o 
 *.d
 ircserv
+*.log

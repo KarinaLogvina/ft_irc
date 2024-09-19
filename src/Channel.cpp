@@ -52,9 +52,7 @@ void Channel::SetLimit(int limit){this->limit = limit;}
 void Channel::SetTopicName(std::string topic_name){this->topicName = topic_name;}
 void Channel::SetPassword(std::string password){this->password = password;}
 void Channel::SetName(std::string& name) {
-    if (!name.empty() && (name[0] == '#' || name[0] == '&')) {
-        this->name = name;  // Name already has a prefix
-    }
+    this->name = name;
 }
 
 void Channel::setCreateiontime(){
