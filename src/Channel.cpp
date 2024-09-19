@@ -1,5 +1,4 @@
 #include "../includes/Channel.hpp"
-#include "Channel.hpp"
 
 Channel::Channel(){
   this->topic = 0;
@@ -134,13 +133,19 @@ void Channel::removeAdmin(int fd) {
   }
 }
 
-void Channel::sendToAll(std::string rpl1) {
-  for(size_t i = 0; i < admins.size(); i++)
+void Channel::sendToAll(std::string rpl1, int except_fd) {
+  for(size_t i = 0; i < admins.size(); i++) {
+      if (admins[i].GetFd() == except_fd)
+        continue;
       if(send(admins[i].GetFd(), rpl1.c_str(), rpl1.size(),0) == -1)
           std::cerr << "send() faild" << std::endl;
-  for(size_t i = 0; i < clients.size(); i++)
+  }
+  for(size_t i = 0; i < clients.size(); i++) {
+      if (clients[i].GetFd() == except_fd)
+        continue;
       if(send(clients[i].GetFd(), rpl1.c_str(), rpl1.size(),0) == -1)
           std::cerr << "send() faild" << std::endl;
+  }
 }
 
 void Channel::sendToAllExcept(std::string rpl1, int fd){

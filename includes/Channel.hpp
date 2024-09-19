@@ -71,7 +71,7 @@ class Channel {
     std::string getModes() const;
     bool removeClientAdminStatus(std::string &nickname);
 
-    void sendToAll(std::string replay);
+    void sendToAll(std::string replay, int except_fd = 0);
     void sendToAllExcept(std::string rpl1, int fd);
     bool getModeAtindex(size_t index);
     void setModeAtindex(size_t index, bool mode);

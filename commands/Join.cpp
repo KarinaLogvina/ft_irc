@@ -128,11 +128,11 @@ void Server::JoinToExistingChannel(std::vector<std::pair<std::string, std::strin
             RPL_ENDOFNAMES(cli->getNickname(), channels[j].GetChannelName()), fd);
     } else {
         _sendResponse(joinMsg + 
-                      RPL_TOPICIS(getClient(fd)->getNickname(),  channels[j].GetChannelName(), channels[j].GetTopicName()) + 
-                      RPL_NAMREPLY(getClient(fd)->getNickname(),  channels[j].GetChannelName(), channels[j].clientChannel_list()) + 
-                      RPL_ENDOFNAMES(getClient(fd)->getNickname(),  channels[j].GetChannelName()), fd);
+                      RPL_TOPICIS(cli->getNickname(),  channels[j].GetChannelName(), channels[j].GetTopicName()) + 
+                      RPL_NAMREPLY(cli->getNickname(),  channels[j].GetChannelName(), channels[j].clientChannel_list()) + 
+                      RPL_ENDOFNAMES(cli->getNickname(),  channels[j].GetChannelName()), fd);
         
-        channels[j].sendToAll(joinMsg); //BUG FIX!!! SEND TO ALL EXCEPT THE NEW ONE
+        channels[j].sendToAll(joinMsg, fd); //BUG FIX!!! SEND TO ALL EXCEPT THE NEW ONE
     }
 }
 
