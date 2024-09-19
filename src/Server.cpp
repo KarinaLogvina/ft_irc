@@ -2,6 +2,7 @@
 #include <sys/fcntl.h>
 #include <cstddef>
 #include <ctime>
+#include <cstdlib>
 #include <string>
 #include <sstream>  // Included for std::ostringstream
 #include <algorithm> // Included for std::find_if, std::not1, std::ptr_fun
@@ -122,17 +123,17 @@ int Server::init(char *port, std::string password) {
 
     serv_socket = socket(serv->ai_family, serv->ai_socktype, serv->ai_protocol);
     if (serv_socket == -1) {
-        perror("Error: socket");
+        herror("Error: socket");
         freeaddrinfo(serv);
         return -1;
     }
     if (setsockopt(serv_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
-        perror("Error: setsockopt");
+        herror("Error: setsockopt");
         freeaddrinfo(serv);
         return -1;
     }
     if (bind(serv_socket, serv->ai_addr, serv->ai_addrlen) == -1) {
-        perror("Error: bind");
+        herror("Error: bind");
         freeaddrinfo(serv);
         return -1;
     }
@@ -177,7 +178,7 @@ void Server::add_fd(int socket) {
 
 void Server::stop(std::string error) {
     std::string error_message = "Error: " + error;
-    perror(error_message.c_str());
+    herror(error_message.c_str());
     fds.clear();
     exit(-1);
 }

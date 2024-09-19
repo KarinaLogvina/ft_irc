@@ -31,7 +31,8 @@ class Channel {
     ~Channel();
     Channel(Channel const &src);
     Channel &operator=(Channel const &src);
-    bool operator==(const Channel &other) const;
+    bool operator==(const Channel &other);
+
 
     //---getters---
     int GetTopic();
@@ -82,6 +83,5 @@ class Channel {
     void setChangedBy(std::string nickname);
 };
 
-bool operator==(Channel &lhs, Channel &rhs);
 
 #endif //FT_IRC_CHANNEL_HPP

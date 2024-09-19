@@ -153,12 +153,22 @@ bool validPassword(const std::string& password) {
     return true;
 }
 
-// Checks if the limit is a valid positive integer
+
 bool Server::isvalidLimit(const std::string& limit) {
-    return std::all_of(limit.begin(), limit.end(), ::isdigit) && std::stoi(limit) > 0;
+    // Manually check if all characters are digits
+    for (std::string::const_iterator it = limit.begin(); it != limit.end(); ++it) {
+        if (!std::isdigit(*it)) {
+            return false;
+        }
+    }
+
+    // Convert the string to an integer using std::atoi and check if the value is greater than 0
+    return std::atoi(limit.c_str()) > 0;
 }
 
+
 // Handles the 'channel limit' mode for a channel
+
 std::string Server::channelLimit(std::vector<std::string> tokens, Channel* channel, std::vector<std::string>::size_type& pos, char operation, int fd, std::string& chain, std::string& arguments) {
     if (operation == '+') {
         if (tokens.size() > pos) {
@@ -167,7 +177,7 @@ std::string Server::channelLimit(std::vector<std::string> tokens, Channel* chann
                 _sendResponse(ERR_INVALIDMODEPARM(getClient(fd)->getNickname(), channel->GetChannelName(), "l", limit), fd);
             } else {
                 channel->setModeAtindex(4, true);
-                channel->SetLimit(static_cast<int>(std::atoi(limit.c_str())));
+                channel->SetLimit(static_cast<int>(std::atoi(limit.c_str())));  // Using std::atoi for C++98 compatibility
                 if (!arguments.empty()) {
                     arguments += " ";
                 }

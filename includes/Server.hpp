@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <unistd.h> // close
 #include "Channel.hpp"
+#include <cstdlib>
 #include "Client.hpp"
 #include "response.hpp" // IWYU pragma: export
 #include "utils.hpp" // IWYU pragma: export

@@ -16,7 +16,7 @@ Channel::Channel(){
 		modes.push_back(std::make_pair(charaters[i],false));
 }
 
-Channel::~Channel() {}
+Channel::~Channel() {};
 Channel::Channel(Channel const &src) {*this = src;}
 Channel & Channel::operator=(Channel const &src){
   if (this != &src) {
@@ -241,7 +241,6 @@ std::string Channel::getModes() const {
     return mode;
 }
 
-bool Channel::operator==(const Channel &other) const
-{
-  return this->GetChannelName() == other.GetChannelName();
+bool Channel::operator==(const Channel &other) {
+    return this->GetChannelName() == other.GetChannelName();
 }

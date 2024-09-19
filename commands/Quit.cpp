@@ -45,16 +45,19 @@ void Server::handleClientQuit(int fd, const std::string& reason, Channel& channe
     std::cout << "after send" << std::endl;
     channel.removeClient(fd);
     std::cout << "after remove" << std::endl;
+
     if (channel.GetNumberOfClients() == 0) {
         // Удаляем канал, если в нем больше нет клиентов
-        std::vector<Channel>::iterator it;
-        it = std::find(channels.begin(), channels.end(), channel);
-        if (it != channels.end()) {
-            channels.erase(it);
+        for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); ++it) {
+            if (*it == channel) { // Uses operator==
+                channels.erase(it);
+                break; // Break after erasing to avoid invalidating the iterator
+            }
         }
     }
     std::cout << "before return" << std::endl;
 }
+
 
 int Server::Quit(std::string command, int fd) {
     std::string reason = SplitQuitCommand(command);
