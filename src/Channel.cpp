@@ -54,8 +54,6 @@ void Channel::SetPassword(std::string password){this->password = password;}
 void Channel::SetName(std::string& name) {
     if (!name.empty() && (name[0] == '#' || name[0] == '&')) {
         this->name = name;  // Name already has a prefix
-    } else {
-        this->name = "#" + name;  // Add '#' prefix
     }
 }
 
