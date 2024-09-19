@@ -40,15 +40,34 @@ int Server::SplitJoin(std::vector<std::pair<std::string, std::string> >& token, 
         passwordStr = parts[0];
     }
 
-    // Split channels and push to token
-    std::stringstream channelStream(channelStr);
-    while (std::getline(channelStream, buffer, ',')) {
-        token.push_back(std::make_pair(buffer, ""));
+    // Handle channel names with special characters by reading until the end of the command
+    size_t pos = channelStr.find(' ');
+    if (pos != std::string::npos) {
+        // There's a space, so the actual channel names might include special characters
+        std::string channelPart = channelStr.substr(0, pos);
+        std::string remainingCmd = channelStr.substr(pos + 1);
+        
+        // Handle channel part
+        std::istringstream channelStream(channelPart);
+        while (std::getline(channelStream, buffer, ',')) {
+            token.push_back(std::make_pair(buffer, ""));
+        }
+
+        // Handle remaining part of the command (which includes passwords if present)
+        std::istringstream remainingStream(remainingCmd);
+        std::getline(remainingStream, passwordStr, ' ');  // Passwords are space-separated
+
+    } else {
+        // There's no space, so we assume no special characters are involved
+        std::istringstream channelStream(channelStr);
+        while (std::getline(channelStream, buffer, ',')) {
+            token.push_back(std::make_pair(buffer, ""));
+        }
     }
 
     // Split passwords and assign to corresponding channels
     if (!passwordStr.empty()) {
-        std::stringstream passwordStream(passwordStr);
+        std::istringstream passwordStream(passwordStr);
         size_t index = 0;
         while (std::getline(passwordStream, buffer, ',') && index < token.size()) {
             token[index].second = buffer;
@@ -58,27 +77,28 @@ int Server::SplitJoin(std::vector<std::pair<std::string, std::string> >& token, 
 
     // Remove empty channel names
     std::vector<std::pair<std::string, std::string> > nonEmptyTokens;
-    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = token.begin(); it != token.end(); ++it) {
+    std::vector<std::pair<std::string, std::string> >::iterator it = token.begin();
+    while (it != token.end()) {
         if (!it->first.empty()) {
             nonEmptyTokens.push_back(*it);
         }
+        ++it;
     }
     token.swap(nonEmptyTokens);
 
     // Validate channels and remove invalid ones
-    std::vector<std::pair<std::string, std::string> >::iterator it = token.begin();
+    it = token.begin();
     while (it != token.end()) {
         if (it->first.empty() || (it->first[0] != '#' && it->first[0] != '&')) {
             senderror(403, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :No such channel\r\n");
             it = token.erase(it);
         } else {
-            // Keep the '#' in the channel name
             ++it;
         }
     }
-
     return 0;
 }
+
 
 
 bool IsInvited(Client *client, std::string channelName, int flag) {
