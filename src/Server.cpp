@@ -243,103 +243,87 @@ bool IsNotSpace(char c) {
     return !std::isspace(static_cast<unsigned char>(c));
 }
 
-int Server::parse_messages(std::string messages, int fd) {
-    std::string message;
-    size_t position;
+int Server::parse_messages(std::string messages, int fd) //change to stringstream
+{
+  std::string message;
+  size_t position;
 
-    while (!messages.empty()) {
-        size_t position_crlf = messages.find("\r\n");
-        size_t position_lf = messages.find("\n");
+  while ( (position = messages.find_first_of("\r\n")) != std::string::npos) // changed from \r to \r\n
+  {
+    message = messages.substr(0, messages.find_first_of("\r\n"));
+    if (message.empty())
+      return ERR;
+    std::cout << "Received message: \"" << message << "\" from client "
+          << getClientIdentifier(fd) << std::endl;
+    if (this->parseMessage(message, fd) == ERR) // stop parsing
+      return ERR;
+    if (messages[position] == '\n') //if not an irc client, e.g. nc
+      return ERR;
+    messages = messages.substr(messages.find("\r") + 2);
+  }
 
-        if (position_crlf != std::string::npos && (position_crlf < position_lf || position_lf == std::string::npos))
-            position = position_crlf;
-        else
-            position = position_lf;
-
-        if (position == std::string::npos) {
-            std::cerr << "No newline found in message. Stopping further parsing." << std::endl;
-            break;
-        }
-
-        message = messages.substr(0, position);
-
-        if (position_crlf != std::string::npos && position == position_crlf)
-            messages = messages.substr(position + 2);
-        else
-            messages = messages.substr(position + 1);
-
-		message.erase(message.begin(), std::find_if(message.begin(), message.end(), IsNotSpace));
-
-		message.erase(std::find_if(message.rbegin(), message.rend(), IsNotSpace).base(), message.end());
-
-
-        // Skip empty messages
-        if (message.empty()) {
-            std::cerr << "Skipping empty message." << std::endl;
-            continue;
-        }
-
-        // Tokenize the message to check if it is a command
-        std::istringstream iss(message);
-        std::string token;
-        iss >> token;
-
-        if (isCommand(token)) {
-            // Parse tokens to fill client_msg structure
-            parseTokens(message);
-
-            // Process the command and ensure errors are not treated as normal messages
-            int result = this->handleCommands(*getClient(fd));
-            if (result == ERR) {
-                std::cerr << "Error while processing command. Stopping message handling." << std::endl;
-                return ERR;
-            }
-        } else {
-            // Handle as plain text (not a command)
-            std::cout << "User " << getClientIdentifier(fd) << " said: " << message << std::endl;
-
-            // Send a response acknowledging the plain text message
-            std::string reply = ":127.0.0.1 NOTICE " + getClient(fd)->getNickname() + " :Message received: " + message + "\r\n";
-            send(fd, reply.c_str(), reply.size(), 0);
-        }
-    }
-
-    return 0;
+  return 0;
 }
 
-void Server::parseTokens(const std::string &message) {
-    if (message.empty()) return;
+int Server::parseMessage(std::string buffer, int fd)
+{
+  int result;
+  std::string reply;
+  std::string server("127.0.0.1 ");
+  Client *client;
+  this->parseTokens(buffer);
+  client = this->getClient(fd);
+  if ((result = this->handleCommands(*client)) == UNKNOWN_CMD)
+    std::cout << "This is the end of the world" << std::endl;
+  if (result == ERR) // stop parsing, command terminated with error
+    return ERR;
+  return 0;
+}
 
-    std::istringstream iss(message);
-    std::string token;
+void Server::parseTokens(const std::string &message)
+{
+  std::istringstream iss(message);
+  std::string token;
+  std::string line;
 
-    client_msg.raw = message;
-    client_msg.source.clear();
-    client_msg.command.clear();
-    client_msg.params.clear();
-    client_msg.trailing.clear();
+  std::memset(&this->client_msg, 0,
+        sizeof(this->client_msg)); // change for safe variant
 
-    // Check for prefix
-    if (message[0] == ':') {
-        iss >> token;
-        client_msg.source = token.substr(1);  // Remove leading ':'
+  std::istringstream iss_line(message);
+
+  client_msg.raw = message;
+  // Check for prefix
+  if (message[0] == ':')
+  {
+    std::getline(iss_line, token, ' ');
+    client_msg.source = token.substr(1); // Remove leading ':'
+  }
+
+  // Get command
+  std::getline(iss_line, token, ' ');
+  client_msg.command = trim(token);
+
+  // Get parameters and trailing
+  bool trailingFound = false;
+  while (std::getline(iss_line, token, ' '))
+  {
+    if (token[0] == ':')
+    {
+      trailingFound = true;
+      client_msg.trailing = trim(token.substr(1)); // Remove leading ':'
+      break;
     }
+    else
+      client_msg.params.push_back(trim(token));
+  }
 
-    // Get command
-    iss >> client_msg.command;
-
-    // Get parameters and trailing
-    while (iss >> token) {
-        if (token[0] == ':') {
-            client_msg.trailing = token.substr(1);  // Remove leading ':'
-            std::string rest;
-            std::getline(iss, rest);
-            client_msg.trailing += rest;
-            break;
-        } else {
-            client_msg.params.push_back(token);
-        }
-    }
+  // Get the rest of the trailing message if any
+  if (trailingFound)
+  {
+    std::string rest;
+    std::getline(iss_line, rest);
+    client_msg.trailing += " " + trim(rest);
+  }
 }
 
 bool Server::isCommand(const std::string &token) {
