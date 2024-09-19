@@ -119,7 +119,7 @@ void Server::JoinToExistingChannel(std::vector<std::pair<std::string, std::strin
     }
     this->channels[j].addClient(*cli);
 
-    std::string joinMsg = RPL_JOINMSG(cli->getNickname(), cli->getHostname(), channels[j].GetChannelName());
+    std::string joinMsg = RPL_JOINMSG(cli->getHostname(), channels[j].GetChannelName());
     channels[j].sendToAll(joinMsg);
 
     if (channels[j].GetTopicName().empty()) {
@@ -127,20 +127,20 @@ void Server::JoinToExistingChannel(std::vector<std::pair<std::string, std::strin
             RPL_NAMREPLY(cli->getNickname(), channels[j].GetChannelName(), channels[j].clientChannel_list()) + 
             RPL_ENDOFNAMES(cli->getNickname(), channels[j].GetChannelName()), fd);
     } else {
-        _sendResponse(
-            RPL_TOPICIS(cli->getNickname(), channels[j].GetChannelName(), channels[j].GetTopicName()) + 
-            RPL_NAMREPLY(cli->getNickname(), channels[j].GetChannelName(), channels[j].clientChannel_list()) + 
-            RPL_ENDOFNAMES(cli->getNickname(), channels[j].GetChannelName()), fd);
+        _sendResponse(joinMsg + 
+                      RPL_TOPICIS(getClient(fd)->getNickname(),  channels[j].GetChannelName(), channels[j].GetTopicName()) + 
+                      RPL_NAMREPLY(getClient(fd)->getNickname(),  channels[j].GetChannelName(), channels[j].clientChannel_list()) + 
+                      RPL_ENDOFNAMES(getClient(fd)->getNickname(),  channels[j].GetChannelName()), fd);
+        
+        channels[j].sendToAll(joinMsg); //BUG FIX!!! SEND TO ALL EXCEPT THE NEW ONE
     }
 }
 
 
-
-void Server::JoinToNotExistingChannel(std::vector<std::pair<std::string, std::string> >& token, int i, int fd) {
-    Client *cli = getClient(fd);
-
-    if (HowManyChannelsClientHas(cli->getNickname()) >= 10) {
-        senderror(405, cli->getNickname(), cli->GetFd(), " :You have joined too many channels\r\n"); 
+void Server::JoinToNotExistingChannel(std::vector<std::pair<std::string, std::string> >&token, int i, int fd) {
+	Client * cli = getClient(fd);
+    if (HowManyChannelsClientHas(getClient(fd)->getNickname()) >= 10){
+        senderror(405, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :You have joined too many channels\r\n"); 
         return;
     }
     Channel newChannel;
@@ -151,7 +151,7 @@ void Server::JoinToNotExistingChannel(std::vector<std::pair<std::string, std::st
     this->channels.push_back(newChannel);
 
     // Notify the client that they joined the channel
-    std::string joinMsg = RPL_JOINMSG(cli->getNickname(), cli->getHostname(), newChannel.GetChannelName());
+    std::string joinMsg = RPL_JOINMSG(cli->getHostname(), newChannel.GetChannelName());
     _sendResponse(
         joinMsg + 
         RPL_NAMREPLY(cli->getNickname(), newChannel.GetChannelName(), newChannel.clientChannel_list()) + 

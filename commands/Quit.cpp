@@ -42,7 +42,9 @@ std::string SplitQuitCommand(std::string command){
 void Server::handleClientQuit(int fd, const std::string& reason, Channel& channel) {
     std::string reply = ":" + getClient(fd)->getNickname() + "!~" + getClient(fd)->getUserName() + "@localhost QUIT " + reason + "\r\n";
     channel.sendToAll(reply);
+    std::cout << "after send" << std::endl;
     channel.removeClient(fd);
+    std::cout << "after remove" << std::endl;
     if (channel.GetNumberOfClients() == 0) {
         // Удаляем канал, если в нем больше нет клиентов
         std::vector<Channel>::iterator it;
@@ -51,6 +53,7 @@ void Server::handleClientQuit(int fd, const std::string& reason, Channel& channe
             channels.erase(it);
         }
     }
+    std::cout << "before return" << std::endl;
 }
 
 int Server::Quit(std::string command, int fd) {

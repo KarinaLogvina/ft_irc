@@ -17,26 +17,24 @@ int Server::Invite(std::string &cmd, int fd) {
   std::string channelname = s_cmd[2].substr(1);
   Channel * channel = GetChannel(channelname);
   if (s_cmd[2][0] != '#' || channel == NULL) {
-    senderror(403, clientNick, fd, ": Channel not found\r\n");
+    _sendResponse(ERR_NOSUCHCHANNEL(clientNick, s_cmd[2]), fd);
     return ERR;
   }
   if(!(channel->get_client(fd)) && !(channel->get_admin(fd))) {
-    senderror(403, clientNick, fd, ": You are not member of channel\r\n");
+    _sendResponse(ERR_NOTONCHANNEL(clientNick, channelname), fd);
     return ERR;
   }
   if(channel->FindClientInChannel(s_cmd[1])) {
-    senderror(443, clientNick, fd, ": This user is already member of this channel\r\n");
+    _sendResponse(ERR_USERONCHANNEL(clientNick, s_cmd[1], channelname), fd);
     return ERR;
   }
   Client *invitee = GetClientByNickname(s_cmd[1]);
   if(!invitee) {
-    //must be error 401, fix asap and remake senderror function
-    senderror(403, clientNick, fd, ":No such user\r\n");
+    _sendResponse(ERR_NOSUCHNICK(clientNick, s_cmd[1]), fd);
     return ERR; 
   }
   if (channel->GetInvitOnly() && !channel->get_admin(fd)){
-    sendChannelerror(482, channel->get_admin(fd)->getNickname(), s_cmd[2], fd, ": You don't have rights to invite users\r\n");
-    return ERR; 
+    _sendResponse(ERR_CHANOPRIVSNEEDED(clientNick, channelname), fd);    return ERR; 
   }
   
   invitee->addChannelInvite(channelname);

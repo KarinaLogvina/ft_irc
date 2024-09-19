@@ -154,6 +154,7 @@ class Server
     void JoinToNotExistingChannel(std::vector<std::pair<std::string, std::string> > &token, int i, int fd);
     int Invite(std::string &cmd, int fd);
     std::string getTopicTime();
+	std::string TopicTimeStamp();
     std::string getTopic(std::string &input);
     int getPositionOfColon(std::string &cmd);
     int Topic(std::string &command, int fd);

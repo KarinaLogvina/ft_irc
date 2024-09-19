@@ -5,7 +5,6 @@
 #include <string>
 #include <sstream>  // Included for std::ostringstream
 #include <algorithm> // Included for std::find_if, std::not1, std::ptr_fun
-#include "Server.hpp"
 
 // Constructor and Destructor
 Server::Server() {
@@ -29,16 +28,9 @@ Server &Server::operator=(const Server &src) {
     return *this;
 }
 
-// --- Getters ---
-int Server::GetPort() { return this->port; }
-int Server::GetFd() { return this->serv_socket; }
-
-std::string Server::getTopicTimestamp() {
-    std::time_t current = std::time(NULL);
-    std::stringstream res;
-    res << current;
-    return res.str();
-}
+// ---getters---
+int Server::GetPort() { return this->port;}
+int Server::GetFd() { return this->serv_socket;}
 
 Client* Server::getClient(int fd) {
     for (size_t i = 0; i < this->clients.size(); ++i) {

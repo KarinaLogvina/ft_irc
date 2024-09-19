@@ -19,7 +19,6 @@
 
 /* Error responses */
 
-#define ERR_NOSUCHNICK(client, nick) "401 " + client + " " + nick + " :No such nick/channel" + "\r\n"
 #define ERR_NEEDMOREPARAMS(client, command) "461 " + client + " " + command + " :Not enough parameters" + "\r\n"
 #define ERR_ALREADYREGISTERED(client) "462 " + client + " :You have been already registered" + "\r\n"
 #define ERR_PASSWDMISMATCH(client) "464 " + client + " :Incorrect password" + "\r\n"

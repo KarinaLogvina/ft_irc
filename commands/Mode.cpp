@@ -72,14 +72,14 @@ std::string Server::topicRestriction(Channel* channel, char operation, const std
 // Handles the 'password' mode for a channel
 std::string Server::passwordMode(std::vector<std::string> tokens, Channel* channel, size_t& pos, char operation, int fd, std::stringstream& mode_chain, std::string& arguments) {
     if (tokens.size() <= pos) {
-        _sendResponse(ERR_INVALIDMODEPARM(channel->GetChannelName(), "(k)"), fd);
+        _sendResponse(ERR_INVALIDMODEPARM(getClient(fd)->getNickname(), channel->GetChannelName(), "k", "<key>"), fd);
         return "";
     }
 
     std::string pass = tokens[pos++];
 
     if (!validPassword(pass)) {
-        _sendResponse(ERR_INVALIDMODEPARM(channel->GetChannelName(), "(k)"), fd);
+        _sendResponse(ERR_INVALIDMODEPARM(getClient(fd)->getNickname(), channel->GetChannelName(), "k", "<key>"), fd);
         return "";
     }
 
@@ -107,13 +107,13 @@ std::string Server::passwordMode(std::vector<std::string> tokens, Channel* chann
 // Handles operator privileges for a channel
 std::string Server::operatorPrivilege(std::vector<std::string> tokens, Channel* channel, size_t& pos, int fd, char operation, std::string& chain, std::string& arguments) {
     if (tokens.size() <= pos) {
-        _sendResponse(ERR_INVALIDMODEPARM(channel->GetChannelName(), "(o)"), fd);
+        _sendResponse(ERR_INVALIDMODEPARM(getClient(fd)->getNickname(),channel->GetChannelName(), "o", "operator"), fd);
         return "";
     }
 
     std::string user = tokens[pos++];
     if (!channel->clientInChannel(user)) {
-        _sendResponse(ERR_NOSUCHUSER(channel->GetChannelName(), user), fd);
+        _sendResponse(ERR_NOSUCHNICK(getClient(fd)->getNickname(), user), fd);
         return "";
     }
 
@@ -164,7 +164,7 @@ std::string Server::channelLimit(std::vector<std::string> tokens, Channel* chann
         if (tokens.size() > pos) {
             std::string limit = tokens[pos++];
             if (!isvalidLimit(limit)) {
-                _sendResponse(ERR_INVALIDMODEPARM(channel->GetChannelName(), "(l)"), fd);
+                _sendResponse(ERR_INVALIDMODEPARM(getClient(fd)->getNickname(), channel->GetChannelName(), "l", limit), fd);
             } else {
                 channel->setModeAtindex(4, true);
                 channel->SetLimit(static_cast<int>(std::atoi(limit.c_str())));
@@ -175,7 +175,7 @@ std::string Server::channelLimit(std::vector<std::string> tokens, Channel* chann
                 return modeToAppend(chain, operation, 'l');
             }
         } else {
-            _sendResponse(ERR_NEEDMODEPARM(channel->GetChannelName(), "(l)"), fd);
+            _sendResponse(ERR_NEEDMOREPARAMS(getClient(fd)->getNickname(), "MODE"), fd);
         }
     } else if (operation == '-' && channel->getModeAtindex(4)) {
         channel->setModeAtindex(4, false);
@@ -203,7 +203,7 @@ int Server::Mode(std::string& command, int fd) {
     if (found != std::string::npos) {
         command = command.substr(found);
     } else {
-        _sendResponse(ERR_NOTENOUGHTPARAMS(client->getNickname()), fd);
+        _sendResponse(ERR_NOTENOUGHTPARAMS(client->getNickname(), "MODE"), fd);
         return ERR;
     }
 
@@ -211,7 +211,7 @@ int Server::Mode(std::string& command, int fd) {
     std::vector<std::string> tokens = splitParams(params);
 
     if (channelName[0] != '#' || !(channel = GetChannel(channelName.substr(1)))) {
-        _sendResponse(ERR_CHANNELNOTFOUND(client->getUserName(), channelName), fd);
+        _sendResponse(ERR_NOSUCHCHANNEL(client->getNickname(), channelName), fd);
         return ERR;
     } else if (!channel->get_client(fd) && !channel->get_admin(fd)) {
         sendChannelerror(442, client->getNickname(), channelName, client->GetFd(), " :You're not on that channel\r\n");
@@ -222,7 +222,7 @@ int Server::Mode(std::string& command, int fd) {
             RPL_CREATIONTIME(client->getNickname(), channel->GetChannelName(), channel->GetTimestamp()), fd);
         return ERR;
     } else if (!channel->get_admin(fd)) {
-        _sendResponse(ERR_NOTOPERATOR(channel->GetChannelName()), fd);
+        _sendResponse(ERR_CHANOPRIVSNEEDED(getClient(fd)->getNickname(),channel->GetChannelName()), fd);
         return ERR;
     }
 
@@ -239,7 +239,7 @@ int Server::Mode(std::string& command, int fd) {
                 case 'k': mode_chain << passwordMode(tokens, channel, pos, operation, fd, mode_chain, arguments); break;
                 case 'o': mode_chain << operatorPrivilege(tokens, channel, pos, fd, operation, chain, arguments); break;
                 case 'l': mode_chain << channelLimit(tokens, channel, pos, operation, fd, chain, arguments); break;
-                default: _sendResponse(ERR_UNKNOWNMODE(client->getNickname(), channel->GetChannelName(), modeset[i]), fd); break;
+                default: _sendResponse(ERR_UNKNOWNMODE(client->getNickname(), modeset[i]), fd); break;
             }
         }
     }

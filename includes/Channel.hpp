@@ -17,9 +17,10 @@ class Channel {
     std::string name;
     std::string password;
     std::string createdAt;
-    std::string creationTime;
+    std::string topicTimeStamp;
     std::string createdTime;
     std::string topicName;
+    std::string changedBy;
     bool topic_restriction;
     std::vector<Client> clients;
     std::vector<Client> admins;
@@ -41,9 +42,11 @@ class Channel {
     std::string GetChannelName() const;
     std::string GetTopicName(){return this->topicName;}
     bool GetTopicRestriction() const{return this->topic_restriction;}
+    std::string getTopicTimeStamp() const;
     std::string GetPassword();
     std::string GetTimestamp();
     std::string clientChannel_list();
+    std::string getChangedBy() const;
 
     Client *get_client(int fd);
     Client *get_admin(int fd);
@@ -55,7 +58,7 @@ class Channel {
     void removeClient(int fd);
     void removeAdmin(int fd);
     void SetInvitOnly(int invit_only);
-    void SetTime(std::string time);
+    void SetTopicTimeStamp(std::string time);
   	void SetTopic(int topic);
   	void SetKey(int key);
   	void SetLimit(int limit);
@@ -75,6 +78,8 @@ class Channel {
     void setTopicRestriction(bool value);
 
     bool clientInChannel(std::string &nick);
+    std::string TopicTimeStamp();
+    void setChangedBy(std::string nickname);
 };
 
 bool operator==(Channel &lhs, Channel &rhs);

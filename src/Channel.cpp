@@ -27,7 +27,6 @@ Channel & Channel::operator=(Channel const &src){
     this->name = src.name;
     this->password = src.password;
     this->createdAt = src.createdAt;
-    this->createdTime = src.creationTime;
     this->topic_restriction = src.topic_restriction;
     this->topicName = src.topicName;
     this->clients = src.clients;
@@ -48,7 +47,7 @@ std::string Channel::GetPassword() { return this->password;}
 std::string Channel::GetTimestamp() { return this->createdAt;}
 void Channel::SetInvitOnly(int invit_only){this->is_invite_only = invit_only;}
 void Channel::SetTopic(int topic){this->topic = topic;}
-void Channel::SetTime(std::string time){this->creationTime = time;}
+void Channel::SetTopicTimeStamp(std::string time){this->topicTimeStamp = time;}
 void Channel::SetKey(int key){this->key = key;}
 void Channel::SetLimit(int limit){this->limit = limit;}
 void Channel::SetTopicName(std::string topic_name){this->topicName = topic_name;}

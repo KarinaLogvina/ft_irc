@@ -1,11 +1,23 @@
 #include "../includes/Server.hpp"
 
 
-std::string Server::getTopicTime() {
+std::string Channel::TopicTimeStamp() {
     std::time_t current = std::time(NULL);
     std::stringstream res;
     res << current;
     return res.str();
+}
+
+std::string Channel::getTopicTimeStamp() const {
+    return topicTimeStamp;
+}
+
+void Channel::setChangedBy(std::string hostname) {
+    this->changedBy = hostname;
+}
+
+std::string Channel::getChangedBy() const {
+    return changedBy;
 }
 
 std::string Server::getTopic(std::string &input) {
@@ -25,15 +37,17 @@ int Server::getPositionOfColon(std::string &cmd) {
 
 
 int Server::Topic(std::string &command, int fd) {
+    std::string clientNick = getClient(fd)->getNickname();
+    
     if (command == "TOPIC :") {
-        senderror(461, getClient(fd)->getNickname(), fd, " :Not enough parameters\r\n");
+        _sendResponse(ERR_NOTENOUGHTPARAMS(clientNick, "TOPIC"), fd);
         return ERR;
     }
 
     std::vector<std::string> splitted_command = split_command(command);
 
     if (splitted_command.size() < 2) {
-        senderror(461, getClient(fd)->getNickname(), fd, " :Not enough parameters\r\n");
+        _sendResponse(ERR_NOTENOUGHTPARAMS(clientNick, "TOPIC"), fd);
         return ERR;
     }
 
@@ -41,26 +55,24 @@ int Server::Topic(std::string &command, int fd) {
     Channel* channel = GetChannel(channelName);
 
     if (!channel) {
-        senderror(403, "#" + channelName, fd, " :No such channel\r\n");
+        _sendResponse(ERR_NOSUCHCHANNEL(clientNick, channelName), fd);
         return ERR;
     }
 
     Client* client = getClient(fd);
 
     if (!channel->get_client(fd) && !channel->get_admin(fd)) {
-        senderror(442, "#" + channelName, fd, " :You're not on that channel\r\n");
+        _sendResponse(ERR_NOTONCHANNEL(clientNick, channelName), fd);
         return ERR;
     }
 
     // Если команда состоит из двух частей, вернуть текущую тему или сообщение об отсутствии темы
     if (splitted_command.size() == 2) {
         if (channel->GetTopicName().empty()) {
-            _sendResponse(": 331 " + client->getNickname() + " #" + channelName + " :No topic is set\r\n", fd);
+            _sendResponse(RPL_NOTOPIC(clientNick, channelName), fd);
         } else {
-            std::string topicResponse = ": 332 " + client->getNickname() + " #" + channelName + " " + channel->GetTopicName() + "\r\n";
-            std::string timeResponse = ": 333 " + client->getNickname() + " #" + channelName + " " + client->getNickname() + " " + channel->GetTimestamp() + "\r\n";
-            _sendResponse(topicResponse, fd);
-            _sendResponse(timeResponse, fd);
+            _sendResponse(RPL_TOPIC(clientNick, channelName, channel->GetTopicName()), fd);
+            _sendResponse(RPL_TOPICWHOTIME(clientNick, channelName, channel->getChangedBy(), channel->getTopicTimeStamp()), fd);
         }
         return ERR;
     }
@@ -69,16 +81,10 @@ int Server::Topic(std::string &command, int fd) {
     std::string newTopic;
     int pos = getPositionOfColon(command);
 
-    if (pos == -1 || splitted_command[2][0] != ':') {
+    if (pos == -1 || splitted_command[2][0] != ':')
         newTopic = splitted_command[2];
-    } else {
-        newTopic = command.substr(pos);
-    }
-
-    if (newTopic == ":") {
-        senderror(331, "#" + channelName, fd, " :No topic is set\r\n");
-        return ERR;
-    }
+    else
+        newTopic = command.substr(pos + 1);
 
     // Проверка на привилегии для установки темы
     if (channel->GetTopicRestriction() && !channel->get_admin(fd)) {
@@ -88,9 +94,10 @@ int Server::Topic(std::string &command, int fd) {
 
     // Установка новой темы и времени
     channel->SetTopicName(newTopic);
-    channel->SetTime(getTopicTimestamp());
+    channel->SetTopicTimeStamp(channel->TopicTimeStamp());
+    channel->setChangedBy(getClient(fd)->getHostname());
 
-    std::string response = ":" + client->getNickname() + "!" + client->getUserName() + "@localhost TOPIC #" + channelName + " " + newTopic + "\r\n";
+    std::string response = ":" + client->getHostname() + " TOPIC #" + channelName + " :" + newTopic + "\r\n";
     channel->sendToAll(response);
     return 0;
 }
