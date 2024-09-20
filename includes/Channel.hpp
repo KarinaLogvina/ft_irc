@@ -81,6 +81,7 @@ class Channel {
     bool clientInChannel(std::string &nick);
     std::string TopicTimeStamp();
     void setChangedBy(std::string nickname);
+    bool isEmpty() const;
 };
 
 

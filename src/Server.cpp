@@ -350,6 +350,7 @@ int Server::handleCommands(Client &client) {
     commandMap["USER"] = &Server::handleUser;
     commandMap["PING"] = &Server::handlePong;
     // commandMap["PRIVMSG"] = &Server::handlePrivMsg;
+    commandMap["PART"] = &Server::Part;
 
     // Handle certain commands manually
     if (client_msg.command == "JOIN")

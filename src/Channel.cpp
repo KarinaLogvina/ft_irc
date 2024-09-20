@@ -240,3 +240,7 @@ std::string Channel::getModes() const {
 bool Channel::operator==(const Channel &other) {
     return this->GetChannelName() == other.GetChannelName();
 }
+
+bool Channel::isEmpty() const {
+  return clients.empty() && admins.empty();
+}

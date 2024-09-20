@@ -76,6 +76,7 @@ class Server
 	bool checkNickname(std::string nickname);
 	int handlePong(Client &client);
 	int handlePrivMsg(Client & client);
+	int Part(Client& client);
 
    public:
 	Server();
