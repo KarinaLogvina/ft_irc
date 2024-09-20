@@ -114,46 +114,46 @@ bool IsInvited(Client *client, std::string channelName, int flag) {
 
 void Server::JoinToExistingChannel(std::vector<std::pair<std::string, std::string> >& token, int i, int j, int fd) {
     Client *cli = getClient(fd);
+    std::string clientNick = cli->getNickname();
+    Channel & channel = channels[j];
+    std::string channelName = channel.GetChannelName();
 
-    if (this->channels[j].FindClientInChannel(cli->getNickname())) {
+    if (channel.FindClientInChannel(clientNick)) {
         return;
     }
-    if (HowManyChannelsClientHas(cli->getNickname()) >= 10) {
-        senderror(405, cli->getNickname(), cli->GetFd(), " :You have joined too many channels\r\n");
+    if (HowManyChannelsClientHas(clientNick) >= 10) {
+        _sendResponse(ERR_TOOMANYCHANNELS(clientNick, channelName), fd);
         return;
     }
-    if (!this->channels[j].GetPassword().empty() && this->channels[j].GetPassword() != token[i].second) {
-        if (!IsInvited(cli, token[i].first, 0)) {
-            sendChannelerror(475, cli->getNickname(), token[i].first, cli->GetFd(), " :Cannot join channel (+k) - bad key\r\n");
-            return;
-        }
+    if (!channel.GetPassword().empty() && channel.GetPassword() != token[i].second) {
+        _sendResponse(ERR_BADCHANNELKEY(clientNick, channelName), fd);
+        return;
     }
-    if (this->channels[j].GetInvitOnly()) {
+    if (channel.GetInvitOnly()) {
         if (!IsInvited(cli, token[i].first, 1)) {
-            _sendResponse(ERR_INVITEONLYCHAN(cli->getNickname(), channels[j].GetChannelName()), fd);
+            _sendResponse(ERR_INVITEONLYCHAN(clientNick, channelName), fd);
             return;
         }
     }
-    if (this->channels[j].GetLimit() && this->channels[j].GetNumberOfClients() >= this->channels[j].GetLimit()) {
-        senderror(471, cli->getNickname(), cli->GetFd(), " :Cannot join channel (+l)\r\n"); 
+    if (channel.GetLimit() && channel.GetNumberOfClients() >= channel.GetLimit()) {
+        _sendResponse(ERR_CHANNELISFULL(clientNick, channelName), fd);
         return;
     }
-    this->channels[j].addClient(*cli);
+    channel.addClient(*cli);
 
-    std::string joinMsg = RPL_JOINMSG(cli->getHostname(), channels[j].GetChannelName());
-    channels[j].sendToAll(joinMsg);
+    std::string joinMsg = RPL_JOINMSG(cli->getHostname(), channelName);
+    channel.sendToAll(joinMsg);
 
-    if (channels[j].GetTopicName().empty()) {
-        _sendResponse(
-            RPL_NAMREPLY(cli->getNickname(), channels[j].GetChannelName(), channels[j].clientChannel_list()) + 
-            RPL_ENDOFNAMES(cli->getNickname(), channels[j].GetChannelName()), fd);
+    if (channel.GetTopicName().empty()) {
+        _sendResponse(RPL_NAMREPLY(clientNick, channelName, channel.clientChannel_list()) + 
+                      RPL_ENDOFNAMES(clientNick, channelName), fd);
+            
     } else {
-        _sendResponse(joinMsg + 
-                      RPL_TOPICIS(cli->getNickname(),  channels[j].GetChannelName(), channels[j].GetTopicName()) + 
-                      RPL_NAMREPLY(cli->getNickname(),  channels[j].GetChannelName(), channels[j].clientChannel_list()) + 
-                      RPL_ENDOFNAMES(cli->getNickname(),  channels[j].GetChannelName()), fd);
+        _sendResponse(RPL_TOPICIS(clientNick,  channelName, channel.GetTopicName()) + 
+                      RPL_TOPICWHOTIME(clientNick, channelName, channel.getChangedBy(), channel.getTopicTimeStamp()) +
+                      RPL_NAMREPLY(clientNick,  channelName, channel.clientChannel_list()) + 
+                      RPL_ENDOFNAMES(clientNick,  channelName), fd);
         
-        channels[j].sendToAll(joinMsg, fd); //BUG FIX!!! SEND TO ALL EXCEPT THE NEW ONE
     }
 }
 
@@ -165,12 +165,9 @@ void Server::JoinToNotExistingChannel(std::vector<std::pair<std::string, std::st
         return;
     }
     Channel newChannel;
-    std::cout << token[i].first << std::endl;
-    std::cout << "here" << std::endl;
-
     newChannel.SetName(token[i].first);
     newChannel.addAdmin(*cli);
-    newChannel.addClient(*cli); // Add client to client list
+    // newChannel.addClient(*cli); // DO NOT Add client to client list, because he's an admin on a new channel. We have them separated or admins are a part of users?
     newChannel.setCreateiontime();
     this->channels.push_back(newChannel);
 
@@ -225,7 +222,7 @@ int Server::Join(std::string command, int fd) {
     for (size_t i = 0; i < token.size(); i++) {
         bool flag = false;
         for (size_t j = 0; j < this->channels.size(); j++) {
-            if (this->channels[j].GetChannelName() == token[i].first) {
+            if (channels[j].GetChannelName() == token[i].first) {
                 JoinToExistingChannel(token, i, j, fd);
                 flag = true;
                 break;

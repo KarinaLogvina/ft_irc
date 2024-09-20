@@ -9,10 +9,13 @@
 #define ERR_NOSUCHNICK(client, nickname) ("401 " + (client) + " " + (nickname) + " :No such nick/channel" + CRLF)
 #define ERR_NEEDMODEPARM(client, command) ("461 " + (client) + " " + (command) + " :Not enough parameters" + CRLF)
 #define ERR_UNKNOWNMODE(client, modechar) ("472 " + (client) + " " + std::string(1, (modechar)) + " :is unknown mode char to me" + CRLF)
-#define ERR_INVITEONLYCHAN(nickname, channelname) ("473 " + nickname + " #" + channelname + " :Cannot join channel (+i)" + CRLF)
+#define ERR_INVITEONLYCHAN(nickname, channelname) ("473 " + nickname + " #" + channelname + " :Cannot join channel, invite only (+i)" + CRLF)
 #define ERR_CHANOPRIVSNEEDED(client, channelname) ("482 " + client + " #" + channelname + " :You're not channel operator" + CRLF)
 #define ERR_NOTONCHANNEL(client, channelname) ("442 " + client + " #" + channelname + " :You're not on that channel" + CRLF)
 #define ERR_USERONCHANNEL(client, nick, channelname) ("443 " + client + " " + nick + " #" + channelname + " :is already on channel" + CRLF)
+#define ERR_CHANNELISFULL(client, channelname) ("471 " + client + " " + channelname + " :Cannot join channel, limit achieved (+l)" + CRLF)
+#define ERR_TOOMANYCHANNELS(client, channelname) ("405 " + client + " " + channelname + " :You have joined too many channels" + CRLF)
+#define ERR_BADCHANNELKEY(client, channelname) ("475 " + client + " " + channelname + " :Cannot join channel, wrong key (+k)" + CRLF)
 
 // Responses
 #define RPL_JOINMSG(hostname, channelname) (":" + (hostname) + " JOIN #" + (channelname) + CRLF)

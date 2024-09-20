@@ -1,5 +1,4 @@
 #include "../includes/Server.hpp"
-#include "Server.hpp"
 
 void FindPrivmessageCommand(std::string command, std::string tofind, std::string &str) {
     size_t i = 0;

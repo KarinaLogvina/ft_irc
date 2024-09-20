@@ -29,6 +29,8 @@ $(OBJS_DIR)%.o: %.cpp
 			@mkdir -p $(dir $@)
 			$(CC) $(CFLAGS) -c $< -o $@
 
+-include $(OBJS:%.o=%.d)
+
 clean:
 			$(RM) -r $(OBJS_DIR)
 
