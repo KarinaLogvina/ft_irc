@@ -3,6 +3,7 @@
 
 #define ERR 1
 #define UNKNOWN_CMD -1
+#define CRLF "\r\n"
 
 /* Normal responses */
 
@@ -31,5 +32,6 @@
 /* Normal commands */
 
 #define CMD_NICK(user, newNick) "!~" + user + "@127.0.0.1 NICK " + newNick + "\r\n"
+#define CMD_PRIVMSG(source, target, text) (":" + source + " PRIVMSG " + target + " :" + text + CRLF)
 
 #endif

@@ -349,7 +349,7 @@ int Server::handleCommands(Client &client) {
     commandMap["CAP"] = &Server::handleCap;
     commandMap["USER"] = &Server::handleUser;
     commandMap["PING"] = &Server::handlePong;
-    commandMap["PRIVMSG"] = &Server::handlePrivMsg;
+    // commandMap["PRIVMSG"] = &Server::handlePrivMsg;
 
     // Handle certain commands manually
     if (client_msg.command == "JOIN")
@@ -364,6 +364,8 @@ int Server::handleCommands(Client &client) {
         return Topic(client_msg.raw, client.GetFd());
     if (client_msg.command == "MODE")
         return Mode(client_msg.raw, client.GetFd());
+    if (client_msg.command == "PRIVMSG")
+        return PrivMSG(client_msg.raw, client.GetFd());
 
     // Try to find the command in the map
     std::map<std::string, int (Server::*)(Client &)>::iterator it = commandMap.find(client_msg.command);

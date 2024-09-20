@@ -8,7 +8,7 @@ OBJS_DIR	= objs/
 
 SRCS		= main.cpp Server.cpp Client.cpp Channel.cpp utils.cpp
 
-COMMAND_SRCS = Invite.cpp Join.cpp Kick.cpp  Quit.cpp Topic.cpp Mode.cpp
+COMMAND_SRCS = Invite.cpp Join.cpp Kick.cpp Quit.cpp Topic.cpp Mode.cpp PrivMSG.cpp
 
 ALL_SRCS 	= $(SRCS:%=$(SRCS_DIR)%) $(COMMAND_SRCS:%=$(COMMANDS_DIR)%)
 

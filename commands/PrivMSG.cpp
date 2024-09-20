@@ -67,32 +67,23 @@ std::string ParsePrivmsgTargetsAndMessage(std::string cmd, std::vector<std::stri
 }
 
 
-void Server::CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd) {
-    for (size_t i = 0; i < tmp.size(); i++) {
-        if (tmp[i][0] == '#') {
-            // Do not remove the '#' character
-            if (!GetChannel(tmp[i])) {
-                // ERR_NOSUCHNICK (401) if the channel doesn't exist
-                senderror(401, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :No such nick/channel\r\n");
-                tmp.erase(tmp.begin() + i);
-                i--;
-            } else if (!GetChannel(tmp[i])->FindClientInChannel(getClient(fd)->getNickname())) {
-                // ERR_CANNOTSENDTOCHAN (404) if the client is not in the channel
-                sendChannelerror(404, getClient(fd)->getNickname(), tmp[i], getClient(fd)->GetFd(), " :Cannot send to channel\r\n");
-                tmp.erase(tmp.begin() + i);
-                i--;
-            }
-            // No need to modify tmp[i]
+std::vector<std::string> Server::CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd) {
+    std::vector<std::string> targets;
+    std::set<std::string> unique;
+    for (std::vector<std::string>::const_iterator target = tmp.begin(); target != tmp.end(); ++target) {
+        if (unique.find(*target) != unique.end())
+            continue;
+        if ((*target)[0] == '#' && !GetChannel((*target).substr(1))) {
+            _sendResponse(ERR_NOSUCHNICK(getClient(fd)->getNickname(), (*target).substr(1)),  fd);
+        } else if ((*target)[0] != '#' && !GetClientByNickname(*target)) {
+            _sendResponse(ERR_NOSUCHNICK(getClient(fd)->getNickname(), *target),  fd);
         } else {
-            // Handle user targets
-            if (!GetClientByNickname(tmp[i])) {
-                // ERR_NOSUCHNICK (401) if the client doesn't exist
-                senderror(401, tmp[i], getClient(fd)->GetFd(), " :No such nick/channel\r\n");
-                tmp.erase(tmp.begin() + i);
-                i--;
-            }
+            targets.push_back(*target);
         }
+        unique.insert(*target);
+        // std::cout << *target << std::endl;
     }
+    return targets;
 }
 
 
@@ -101,4 +92,39 @@ bool Server::isChannelName(const std::string& name) {
         return false;
     char prefix = name[0];
     return (prefix == '#' || prefix == '&');
+}
+
+int Server::PrivMSG(std::string cmd, int fd) {
+    std::vector<std::string> targets;
+    std::string message = ParsePrivmsgTargetsAndMessage(cmd, targets);
+    Client & cli = *getClient(fd);
+    // Проверка на наличие получателей
+    if (targets.empty()) {
+        _sendResponse(ERR_NORECIPIENT(cli.getNickname()), fd);
+        return ERR;
+    }
+    // Проверка на наличие текста сообщения
+    if (message.empty()) {
+        _sendResponse(ERR_NOTEXTTOSEND(cli.getNickname()), fd);
+        return ERR;
+    }
+    // Проверка существования каналов и клиентов
+    std::vector<std::string> recepients = CheckForChannelsAndClients(targets, fd); 
+
+    // Отправка сообщения получателям
+    for (size_t i = 0; i < 20 && i < recepients.size() ; ++i) {
+        std::string response = CMD_PRIVMSG(cli.getHostname(), recepients[i], message);
+        if (recepients[i][0] == '#') {
+            std::string channelName = recepients[i].substr(1); // Удаляем символ '#'
+            GetChannel(channelName)->sendToAll(response, fd);
+        } else {
+            _sendResponse(response, GetClientByNickname(recepients[i])->GetFd());
+        }
+    }
+
+    if (recepients.size() > 20) {
+        _sendResponse(ERR_TOOMANYTARGETS(cli.getNickname(), recepients[21]), fd);
+    }
+
+    return 0;
 }

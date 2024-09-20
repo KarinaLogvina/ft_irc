@@ -21,6 +21,7 @@
 #include <map>		// IWYU pragma: export  | map
 #include <sstream> // IWYU pragma: export
 #include <vector>
+#include <set> // IWYU pragma: export  | set
 
 #define BUFFER_LENGTH 512
 #include "replies.hpp"
@@ -164,7 +165,7 @@ class Server
     int Kick(std::string cmd, int fd);
     void handleClientQuit(int fd, const std::string &reason, Channel &channel);
     int Quit(std::string command, int fd);
-    int PivMSG(std::string command, int fd);
+    int PrivMSG(std::string command, int fd);
     bool isChannelName(const std::string &name);
     int parseMessage(std::string buffer, int fd);
     bool isvalidLimit(const std::string &limit);
@@ -178,7 +179,7 @@ class Server
     std::string operatorPrivilege(std::vector<std::string> tokens, Channel *channel, size_t &pos, int fd, char operation, std::string &chain, std::string &arguments);
     int Mode(std::string &command, int fd);
     std::string modeToAppend(const std::stringstream& chain, char operation, char mode);
-    void CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd);
+    std::vector<std::string> CheckForChannelsAndClients(std::vector<std::string> &tmp, int fd);
 };
 
 typedef std::vector<std::pair<std::string, std::string> > TokenList;

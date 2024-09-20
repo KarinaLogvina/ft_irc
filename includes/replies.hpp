@@ -16,6 +16,9 @@
 #define ERR_CHANNELISFULL(client, channelname) ("471 " + client + " " + channelname + " :Cannot join channel, limit achieved (+l)" + CRLF)
 #define ERR_TOOMANYCHANNELS(client, channelname) ("405 " + client + " " + channelname + " :You have joined too many channels" + CRLF)
 #define ERR_BADCHANNELKEY(client, channelname) ("475 " + client + " " + channelname + " :Cannot join channel, wrong key (+k)" + CRLF)
+#define ERR_NORECIPIENT(client) ("411 " + client + " :No recipient given" + CRLF)
+#define ERR_NOTEXTTOSEND(client) ("412 " + client + " :No text to send" + CRLF)
+#define ERR_TOOMANYTARGETS(client, target) ("407 " + client + " " + target + " :Too many recepients" + CRLF)
 
 // Responses
 #define RPL_JOINMSG(hostname, channelname) (":" + (hostname) + " JOIN #" + (channelname) + CRLF)
