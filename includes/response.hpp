@@ -33,5 +33,6 @@
 
 #define CMD_NICK(user, newNick) "!~" + user + "@127.0.0.1 NICK " + newNick + "\r\n"
 #define CMD_PRIVMSG(source, target, text) (":" + source + " PRIVMSG " + target + " :" + text + CRLF)
+#define CMD_KICK(hostname, channel, user, reason) (":" + hostname + " KICK " + channel + " " + user + " :" + reason + CRLF)
 
 #endif

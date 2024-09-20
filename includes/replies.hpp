@@ -19,6 +19,7 @@
 #define ERR_NORECIPIENT(client) ("411 " + client + " :No recipient given" + CRLF)
 #define ERR_NOTEXTTOSEND(client) ("412 " + client + " :No text to send" + CRLF)
 #define ERR_TOOMANYTARGETS(client, target) ("407 " + client + " " + target + " :Too many recepients" + CRLF)
+#define ERR_USERNOTINCHANNEL(client, nick, channel) ("441 " + client + " " + nick + " " + channel + " :They aren't on that channel" + CRLF)
 
 // Responses
 #define RPL_JOINMSG(hostname, channelname) (":" + (hostname) + " JOIN #" + (channelname) + CRLF)

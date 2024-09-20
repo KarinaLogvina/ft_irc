@@ -74,7 +74,7 @@ std::vector<std::string> Server::CheckForChannelsAndClients(std::vector<std::str
         if (unique.find(*target) != unique.end())
             continue;
         if ((*target)[0] == '#' && !GetChannel((*target).substr(1))) {
-            _sendResponse(ERR_NOSUCHNICK(getClient(fd)->getNickname(), (*target).substr(1)),  fd);
+            _sendResponse(ERR_NOSUCHNICK(getClient(fd)->getNickname(), (*target)),  fd);
         } else if ((*target)[0] != '#' && !GetClientByNickname(*target)) {
             _sendResponse(ERR_NOSUCHNICK(getClient(fd)->getNickname(), *target),  fd);
         } else {

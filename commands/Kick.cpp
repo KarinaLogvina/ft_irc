@@ -87,6 +87,8 @@ int Server::Kick(std::string cmd, int fd)
 {
     std::vector<std::string> tmp;
     std::string user, reason;
+    std::string clientNick = getClient(fd)->getNickname();
+    Client & cli = *getClient(fd);
 
     // Используем объединённую функцию для разбора команды
     reason = FindAndSplitCmdK(cmd, tmp);
@@ -139,35 +141,29 @@ int Server::Kick(std::string cmd, int fd)
     for (std::vector<std::string>::iterator channel = tmp.begin(); channel != tmp.end(); channel++) {
         Channel* ch = GetChannel(*channel);
         if (!ch) {
-            sendChannelerror(403, getClient(fd)->getNickname(), "#" + *channel, getClient(fd)->GetFd(), " :No such channel\r\n");
+            sendChannelerror(403, getClient(fd)->getNickname(), "#" + *channel, getClient(fd)->GetFd(), " :No such channel\r\n");  //FIXME
             continue;
         }
-
         // Проверяем, является ли пользователь администратором или участником канала
         if (!ch->get_client(fd) && !ch->get_admin(fd)) {
-            sendChannelerror(442, getClient(fd)->getNickname(), "#" + *channel, getClient(fd)->GetFd(), " :You're not on that channel\r\n");
+            sendChannelerror(442, getClient(fd)->getNickname(), "#" + *channel, getClient(fd)->GetFd(), " :You're not on that channel\r\n"); //FIXME
             continue;
         }
 
         if (!ch->get_admin(fd)) {
-            sendChannelerror(482, getClient(fd)->getNickname(), "#" + *channel, getClient(fd)->GetFd(), " :You're not channel operator\r\n");
+            sendChannelerror(482, getClient(fd)->getNickname(), "#" + *channel, getClient(fd)->GetFd(), " :You're not channel operator\r\n"); //FIXME
             continue;
         }
 
         // Проверяем, находится ли пользователь в канале
         if (!ch->FindClientInChannel(user)) {
-            sendChannelerror(441, getClient(fd)->getNickname(), "#" + *channel, getClient(fd)->GetFd(), " :They aren't on that channel\r\n");
+            _sendResponse(ERR_USERNOTINCHANNEL(clientNick, user, "#"+(*channel)), fd);
             continue;
         }
 
         // Формируем и отправляем сообщение об исключении
-        std::stringstream ss;
-        ss << ":" << getClient(fd)->getNickname() << "!~" << getClient(fd)->getUserName() << "@" << "localhost" << " KICK #" << *channel << " " << user;
-        if (!reason.empty())
-            ss << " :" << reason << "\r\n";
-        else
-            ss << "\r\n";
-        ch->sendToAll(ss.str());
+        
+        ch->sendToAll(CMD_KICK(cli.getHostname(), "#"+(*channel), user, reason));
 
         // Удаляем пользователя из канала
         if (ch->get_admin(ch->FindClientInChannel(user)->GetFd())) {
