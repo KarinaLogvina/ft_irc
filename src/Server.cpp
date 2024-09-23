@@ -435,8 +435,7 @@ int Server::handleNick(Client &client) {
 
     // Check if the NICK command has parameters (nickname)
     if (client_msg.params.empty()) {
-        reply = server + ERR_NONICKNAMEGIVEN(client.getNickname());
-        send(client.GetFd(), reply.c_str(), reply.size(), 0);
+        _sendResponse(ERR_NONICKNAMEGIVEN(client.getNickname()), client.GetFd());
         return ERR;
     }
 
@@ -449,34 +448,36 @@ int Server::handleNick(Client &client) {
 
     // Check if the nickname is already in use
     if (this->nicknameExists(newNickname)) {
-        reply = server + ERR_NICKNAMEINUSE(client.getNickname(), newNickname);
-        send(client.GetFd(), reply.c_str(), reply.size(), 0);
+        _sendResponse(ERR_NICKNAMEINUSE(client.getNickname(), newNickname), client.GetFd());
         return ERR;
     }
 
     // Check if the nickname is valid
     if (!checkNickname(newNickname)) {
-        reply = server + ERR_ERRONEUSNICKNAME(client.getNickname(), newNickname);
-        send(client.GetFd(), reply.c_str(), reply.size(), 0);
+        _sendResponse(ERR_ERRONEUSNICKNAME(client.getNickname(), newNickname), client.GetFd());
         return ERR;
     }
 
     // Change the nickname
-    std::string oldNickname = client.getNickname();
+    std::string hostname = client.getHostname();
     client.SetNickName(newNickname);
 
     // If the client is not yet registered, no need to notify other clients
-    if (!client.getIsRegistered())
+    if (!client.getIsRegistered()) {
+        if (!client.getUserName().empty()) {
+            client.SetIsRegistered(true);
+            welcomeClient(client);
+        }
         return 0;
-
+    }
+        
     // Notify other users about the nickname change
-    reply = ":" + oldNickname + " NICK " + newNickname + "\r\n";
-    send(client.GetFd(), reply.c_str(), reply.size(), 0); // Notify the client
+    _sendResponse(CMD_NICK(hostname, newNickname), client.GetFd()); // Notify the client
 
     // Broadcast the nickname change to all connected clients
     for (size_t i = 0; i < this->clients.size(); ++i) {
         if (this->clients[i].GetFd() != client.GetFd()) {
-            send(this->clients[i].GetFd(), reply.c_str(), reply.size(), 0);
+            _sendResponse(CMD_NICK(hostname, newNickname), clients[i].GetFd());
         }
     }
 
