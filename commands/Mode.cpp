@@ -220,7 +220,13 @@ int Server::Mode(std::string& command, int fd) {
     parseCommand(command, channelName, modeset, params);
     std::vector<std::string> tokens = splitParams(params);
 
-    if (channelName[0] != '#' || !(channel = GetChannel(channelName.substr(1)))) {
+    if (channelName[0] != '#'){
+        if (!GetClientByNickname(channelName))
+            _sendResponse(ERR_NOSUCHNICK(client->getNickname(), channelName), client->GetFd());
+        else
+            _sendResponse(ERR_UMODEUNKNOWNFLAG(client->getNickname()), fd);
+        return ERR;
+    } else if (!(channel = GetChannel(channelName.substr(1)))) {
         _sendResponse(ERR_NOSUCHCHANNEL(client->getNickname(), channelName), fd);
         return ERR;
     } else if (!channel->get_client(fd) && !channel->get_admin(fd)) {
