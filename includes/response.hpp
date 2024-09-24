@@ -11,7 +11,7 @@
 #define RPL_YOURHOST(client) "002 " + client + " :Your host is 127.0.0.1, running version 1.0\r\n"
 #define RPL_CREATED(client, datetime) "003 " + client + " :This server was created at: " + datetime + "\r\n"
 #define RPL_MYINFO(client) "004 " + client + " 127.0.0.1 version 1.0, availiable channel modes: -itko\r\n"
-#define RPL_ISUPPORT(client) "005 " + client + " NETWORK=FT_IRC MAXCHANNELS=20 USERLEN=20 CHANMODES=i,t,k,o,l : are supported by this server\r\n"
+#define RPL_ISUPPORT(client) "005 " + client + " NETWORK=FT_IRC MAXCHANNELS=20 USERLEN=20 CHANMODES=,k,l,it CHANTYPES=# CHANLIMIT=#:20 : are supported by this server\r\n"
 #define RPL_MOTD(client) "372 " + client + " :Dont't worry be happy!\r\n"
 #define RPL_MOTDSTART(client) "375 " + client + " : - 127.0.0.1 Message of the day -\r\n"
 #define RPL_ENDOFMOTD(client) "376 " + client + " :End of /MOTD command\r\n"

@@ -16,7 +16,7 @@ int Server::Part(Client& client) {
     std::vector<std::string> channels = split(client_msg.params[0], ',');
 
     for (size_t i = 0; i < channels.size(); i++) {
-        std::string channelName = channels[i].substr(1);
+        std::string channelName = channels[i][0] == '#' ? channels[i].substr(1) : channels[i];
 
         // Check if the channel exists
         Channel* channel = GetChannel(channelName);

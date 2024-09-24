@@ -121,7 +121,7 @@ void Server::JoinToExistingChannel(std::vector<std::pair<std::string, std::strin
     if (channel.FindClientInChannel(clientNick)) {
         return;
     }
-    if (HowManyChannelsClientHas(clientNick) >= 10) {
+    if (HowManyChannelsClientHas(clientNick) >= 20) {
         _sendResponse(ERR_TOOMANYCHANNELS(clientNick, channelName), fd);
         return;
     }
@@ -160,7 +160,7 @@ void Server::JoinToExistingChannel(std::vector<std::pair<std::string, std::strin
 
 void Server::JoinToNotExistingChannel(std::vector<std::pair<std::string, std::string> >&token, int i, int fd) {
 	Client * cli = getClient(fd);
-    if (HowManyChannelsClientHas(getClient(fd)->getNickname()) >= 10){
+    if (HowManyChannelsClientHas(getClient(fd)->getNickname()) >= 20){
         senderror(405, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :You have joined too many channels\r\n"); 
         return;
     }
