@@ -216,7 +216,7 @@ int Server::Join(std::string command, int fd) {
         return ERR;
     }
     if (token.size() > 10) {
-        senderror(407, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :Too many channels\r\n"); 
+        senderror(407, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :Too many channels\r\n"); // FIXME How many targets should we allow
         return ERR;
     }
     for (size_t i = 0; i < token.size(); i++) {

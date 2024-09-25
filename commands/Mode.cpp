@@ -227,7 +227,7 @@ int Server::Mode(std::string& command, int fd) {
             _sendResponse(ERR_UMODEUNKNOWNFLAG(client->getNickname()), fd);
         return ERR;
     } else if (!(channel = GetChannel(channelName.substr(1)))) {
-        _sendResponse(ERR_NOSUCHCHANNEL(client->getNickname(), channelName), fd);
+        _sendResponse(ERR_NOSUCHCHANNEL(client->getNickname(), channelName.substr(1)), fd);
         return ERR;
     } else if (!channel->get_client(fd) && !channel->get_admin(fd)) {
         sendChannelerror(442, client->getNickname(), channelName, client->GetFd(), " :You're not on that channel\r\n");

@@ -449,7 +449,7 @@ int Server::handleNick(Client &client) {
     // Check if the nickname is already in use
     if (this->nicknameExists(newNickname)) {
         _sendResponse(ERR_NICKNAMEINUSE(client.getNickname(), newNickname), client.GetFd());
-        return ERR;
+        return 2;
     }
 
     // Check if the nickname is valid

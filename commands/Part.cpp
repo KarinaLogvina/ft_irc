@@ -16,13 +16,16 @@ int Server::Part(Client& client) {
     std::vector<std::string> channels = split(client_msg.params[0], ',');
 
     for (size_t i = 0; i < channels.size(); i++) {
-        std::string channelName = channels[i][0] == '#' ? channels[i].substr(1) : channels[i];
-
+        if (channels[i][0] != '#') {
+            _sendResponse(ERR_NOSUCHCHANNEL(client.getNickname(), channels[i][0]), client.GetFd());
+            continue;
+        }  
+        std::string channelName = channels[i].substr(1);
         // Check if the channel exists
         Channel* channel = GetChannel(channelName);
         if (!channel) {
             // Channel does not exist
-            _sendResponse(ERR_NOSUCHCHANNEL(client.getNickname(), channelName), client.GetFd());
+            _sendResponse(ERR_NOSUCHCHANNEL(client.getNickname(), channels[i]), client.GetFd());
             continue;
         }
 

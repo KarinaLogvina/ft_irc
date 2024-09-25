@@ -2,7 +2,7 @@
 
 // Error Messages
 #define ERR_NOTENOUGHTPARAMS(nick, command) ("461 " + (nick) + " " + command + " :Not enough parameters" + CRLF)
-#define ERR_NOSUCHCHANNEL(nick, channelname) ("403 " + (nick) + " #" + (channelname) + " :No such channel" + CRLF)
+#define ERR_NOSUCHCHANNEL(nick, channelname) ("403 " + (nick) + " " + (channelname) + " :No such channel" + CRLF)
 #define ERR_USERNOTREGISTERED(nick) ("451 " + (nick) + " :You have not registered" + CRLF)
 #define ERR_INVALIDMODEPARM(client, channelname, mode, param) ("696 " + client + " #" + (channelname) + " " + (mode) + " " + param + " :Invalid mode parameter" + CRLF)
 #define ERR_KEYSET(channelname) ("467 #" + (channelname) + " Channel key already set. " + CRLF)
