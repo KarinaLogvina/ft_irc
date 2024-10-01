@@ -310,10 +310,12 @@ void Server::parseTokens(const std::string &message)
     if (token[0] == ':')
     {
       trailingFound = true;
-      client_msg.trailing = trim(token.substr(1)); // Remove leading ':'
+	  if (token.length() == 1)
+        break;
+	  client_msg.trailing = trim(token.substr(1)); // Remove leading ':'
       break;
     }
-    else
+    if (!token.empty())
       client_msg.params.push_back(trim(token));
   }
 
@@ -425,7 +427,7 @@ int Server::handlePass(Client &client) {
 
 int Server::handleNick(Client &client) {
     std::string server = ":127.0.0.1 ";
-    std::string reply;
+	std::string reply;
 
     // Ensure the client is logged in
     if (!client.getIsLoggedIn()) {
@@ -435,7 +437,7 @@ int Server::handleNick(Client &client) {
 
     // Check if the NICK command has parameters (nickname)
     if (client_msg.params.empty()) {
-        _sendResponse(ERR_NONICKNAMEGIVEN(client.getNickname()), client.GetFd());
+		_sendResponse(ERR_NONICKNAMEGIVEN(client.getNickname()), client.GetFd());
         return ERR;
     }
 
@@ -454,7 +456,7 @@ int Server::handleNick(Client &client) {
 
     // Check if the nickname is valid
     if (!checkNickname(newNickname)) {
-        _sendResponse(ERR_ERRONEUSNICKNAME(client.getNickname(), newNickname), client.GetFd());
+		_sendResponse(ERR_ERRONEUSNICKNAME(client.getNickname(), newNickname), client.GetFd());
         return ERR;
     }
 
@@ -570,7 +572,7 @@ bool Server::nicknameExists(std::string nickname) {
 bool Server::checkNickname(std::string nickname) {
     if (nickname.find_first_of(" ,*?!@.") != std::string::npos)
         return false;
-    if (nickname.find_first_of(":#$&~+") == 0)
+    if (nickname.find_first_of(" :#$&~+") == 0)
         return false;
     if (!containsOnlyASCII(nickname))
         return false;
