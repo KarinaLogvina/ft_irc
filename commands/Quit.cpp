@@ -65,7 +65,7 @@ int Server::Quit(std::string command, int fd) {
         }
     }
 
-    std::cout << "Client <" << fd << "> Disconnected" << std::endl;
+    std::cout << MAGENTA "Client <" << fd << "> Disconnected" << RESET << std::endl;
     removeChannels(fd);
     removeClient(fd);
     removeFd(fd);

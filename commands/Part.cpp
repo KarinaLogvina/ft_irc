@@ -4,7 +4,12 @@ std::vector<std::string> split(const std::string& str, char delimiter);
 
 int Server::Part(Client& client) {
     std::string clientNick = client.getNickname();
-	if (client_msg.params.size() < 1) {
+    if (!client.getIsRegistered()) {
+      _sendResponse(ERR_NOTREGISTERED(clientNick), client.GetFd());
+      return ERR;
+    }
+
+    if (client_msg.params.size() < 1) {
         // Send error: need more parameters
         _sendResponse(ERR_NEEDMOREPARAMS(clientNick, "PART"), client.GetFd());
         return ERR;

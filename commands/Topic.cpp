@@ -38,7 +38,12 @@ int Server::getPositionOfColon(std::string &cmd) {
 
 int Server::Topic(std::string &command, int fd) {
     std::string clientNick = getClient(fd)->getNickname();
-    
+
+    if (!getClient(fd)->getIsRegistered()) {
+      _sendResponse(ERR_NOTREGISTERED(clientNick), fd);
+      return ERR;
+    }
+
     if (command == "TOPIC :") {
         _sendResponse(ERR_NOTENOUGHTPARAMS(clientNick, "TOPIC"), fd);
         return ERR;

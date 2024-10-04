@@ -192,7 +192,7 @@ void Server::accept_client(void) {
     if (client_socket == -1)
         this->stop("accept");
     this->add_fd(client_socket);
-    std::cout << "Client " << getClientIdentifier(client_socket) << " connected" << std::endl;
+    std::cout << CYAN << "Client " << getClientIdentifier(client_socket) << " connected" << RESET << std::endl;
     this->AddNewClient(client_socket);
 }
 
@@ -235,7 +235,7 @@ void Server::disconnect_client(int fd) {
     this->removeChannels(fd); // Remove client from all channels
     this->removeClient(fd);
     close(fd);
-    std::cout << "Client " << getClientIdentifier(fd) << " closed connection" << std::endl;
+    std::cout << MAGENTA << "Client " << getClientIdentifier(fd) << " closed connection" << RESET << std::endl;
     this->removeFd(fd);
 }
 
@@ -410,7 +410,7 @@ int Server::handlePass(Client &client) {
 
     // Validate the provided password
     if (client_msg.params[0] == this->password) {
-        std::cout << "Password accepted" << std::endl;
+        std::cout << GREEN << "Password accepted" << RESET << std::endl;
         client.SetIsLoggedIn(true);
         return 0;
     } else {

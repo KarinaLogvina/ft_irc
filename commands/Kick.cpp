@@ -93,6 +93,11 @@ int Server::Kick(std::string cmd, int fd)
     // Используем объединённую функцию для разбора команды
     reason = FindAndSplitCmdK(cmd, tmp);
 
+    if (!cli.getIsRegistered()) {
+      _sendResponse(ERR_NOTREGISTERED(getClient(fd)->getNickname()), fd);
+      return ERR;
+    }
+
     // Проверяем, указаны ли все необходимые параметры
     if (tmp.size() < 3) {
         senderror(461, getClient(fd)->getNickname(), getClient(fd)->GetFd(), " :Not enough parameters\r\n");

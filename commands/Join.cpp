@@ -205,7 +205,12 @@ int Server::HowManyChannelsClientHas(std::string nick) {
 
 int Server::Join(std::string command, int fd) {
     std::vector<std::pair<std::string, std::string> > token;
-      // Check if the client's nickname is set
+    if (!getClient(fd)->getIsRegistered()) {
+      _sendResponse(ERR_NOTREGISTERED(getClient(fd)->getNickname()), fd);
+      return ERR;
+    }
+
+    // Check if the client's nickname is set
     if (getClient(fd)->getNickname().empty() || getClient(fd)->getNickname() == "*") {
         senderror(431, "*", fd, " :No nickname given\r\n");
         return ERR;

@@ -210,6 +210,11 @@ int Server::Mode(std::string& command, int fd) {
     Client* client = getClient(fd);
     std::string::size_type found = command.find_first_not_of("MODEmode \t\v");
 
+    if (!client->getIsRegistered()) {
+      _sendResponse(ERR_NOTREGISTERED(getClient(fd)->getNickname()), fd);
+      return ERR;
+    }
+
     if (found != std::string::npos) {
         command = command.substr(found);
     } else {

@@ -10,6 +10,10 @@ ERR_USERONCHANNEL (443)*/
 int Server::Invite(std::string &cmd, int fd) {
   std::vector<std::string> s_cmd = split_command(cmd);
   std::string clientNick = getClient(fd)->getNickname();
+  if (!getClient(fd)->getIsRegistered()) {
+    _sendResponse(ERR_NOTREGISTERED(getClient(fd)->getNickname()), fd);
+    return ERR;
+  }
   if (s_cmd.size() < 3) {
     senderror(461, clientNick, fd, ": Not enough parameters\r\n");
     return ERR;

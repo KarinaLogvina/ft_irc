@@ -21,6 +21,7 @@
 #define ERR_TOOMANYTARGETS(client, target) ("407 " + client + " " + target + " :Too many recepients" + CRLF)
 #define ERR_USERNOTINCHANNEL(client, nick, channel) ("441 " + client + " " + nick + " " + channel + " :They aren't on that channel" + CRLF)
 #define ERR_UMODEUNKNOWNFLAG(client) ("501 " + client + " :Unknown MODE flag" + CRLF)
+#define ERR_NOTREGISTERED(client) ("451 " + client + " :You have not registered" + CRLF)
 
 // Responses
 #define RPL_JOINMSG(hostname, channelname) (":" + (hostname) + " JOIN #" + (channelname) + CRLF)

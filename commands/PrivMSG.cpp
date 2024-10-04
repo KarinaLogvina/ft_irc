@@ -98,6 +98,11 @@ int Server::PrivMSG(std::string cmd, int fd) {
     std::vector<std::string> targets;
     std::string message = ParsePrivmsgTargetsAndMessage(cmd, targets);
     Client & cli = *getClient(fd);
+    if (!cli.getIsRegistered()) {
+      _sendResponse(ERR_NOTREGISTERED(cli.getNickname()), fd);
+      return ERR;
+    }
+
     // Проверка на наличие получателей
     if (targets.empty()) {
         _sendResponse(ERR_NORECIPIENT(cli.getNickname()), fd);
