@@ -390,12 +390,15 @@ int Server::handlePass(Client &client) {
     std::string server = ":127.0.0.1 ";
     std::string reply;
 
-    // Check if the client is already logged in
-    if (client.getIsLoggedIn()) {
+    // Check if the client is already registered
+    if (client.getIsRegistered()) {
         reply = server + ERR_ALREADYREGISTERED(client.getNickname());
         send(client.GetFd(), reply.c_str(), reply.size(), 0);
         return 0;
     }
+
+    if (client.getIsLoggedIn())
+      return ERR;
 
     // Check if the PASS command has at least one parameter (the password)
     if (client_msg.params.size() < 1) {
