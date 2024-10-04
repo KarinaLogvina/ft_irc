@@ -346,32 +346,32 @@ int Server::handleCommands(Client &client) {
     std::map<std::string, int (Server::*)(Client &)> commandMap;
 
     // Populate the command map with supported IRC commands
-    commandMap["PASS"] = &Server::handlePass;
-    commandMap["NICK"] = &Server::handleNick;
-    commandMap["CAP"] = &Server::handleCap;
-    commandMap["USER"] = &Server::handleUser;
-    commandMap["PING"] = &Server::handlePong;
+    commandMap["pass"] = &Server::handlePass;
+    commandMap["nick"] = &Server::handleNick;
+    commandMap["cap"] = &Server::handleCap;
+    commandMap["user"] = &Server::handleUser;
+    commandMap["ping"] = &Server::handlePong;
     // commandMap["PRIVMSG"] = &Server::handlePrivMsg;
-    commandMap["PART"] = &Server::Part;
+    commandMap["part"] = &Server::Part;
 
     // Handle certain commands manually
-    if (client_msg.command == "JOIN")
+    if (client_msg.command == "JOIN" || client_msg.command == "join")
         return Join(client_msg.raw, client.GetFd());
-    if (client_msg.command == "INVITE")
+    if (client_msg.command == "INVITE" || client_msg.command == "invite")
         return Invite(client_msg.raw, client.GetFd());
-    if (client_msg.command == "KICK")
+    if (client_msg.command == "KICK" || client_msg.command == "kick")
         return Kick(client_msg.raw, client.GetFd());
-    if (client_msg.command == "QUIT")
+    if (client_msg.command == "QUIT" || client_msg.command == "quit")
         return Quit(client_msg.raw, client.GetFd());
-    if (client_msg.command == "TOPIC")
+    if (client_msg.command == "TOPIC" || client_msg.command == "topic")
         return Topic(client_msg.raw, client.GetFd());
-    if (client_msg.command == "MODE")
+    if (client_msg.command == "MODE" || client_msg.command == "mode")
         return Mode(client_msg.raw, client.GetFd());
-    if (client_msg.command == "PRIVMSG")
+    if (client_msg.command == "PRIVMSG" || client_msg.command == "privmsg")
         return PrivMSG(client_msg.raw, client.GetFd());
 
     // Try to find the command in the map
-    std::map<std::string, int (Server::*)(Client &)>::iterator it = commandMap.find(client_msg.command);
+    std::map<std::string, int (Server::*)(Client &)>::iterator it = commandMap.find(toLower(client_msg.command));
 
     // If the command is found, call the corresponding handler function
     if (it != commandMap.end()) {
