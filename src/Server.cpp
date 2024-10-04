@@ -267,15 +267,12 @@ int Server::parse_messages(std::string messages, int fd) //change to stringstrea
 
 int Server::parseMessage(std::string buffer, int fd)
 {
-  int result;
   std::string reply;
   std::string server("127.0.0.1 ");
   Client *client;
   this->parseTokens(buffer);
   client = this->getClient(fd);
-  if ((result = this->handleCommands(*client)) == UNKNOWN_CMD)
-    std::cout << "This is the end of the world" << std::endl;
-  if (result == ERR) // stop parsing, command terminated with error
+  if (this->handleCommands(*client) == ERR) // stop parsing, command terminated with error
     return ERR;
   return 0;
 }
